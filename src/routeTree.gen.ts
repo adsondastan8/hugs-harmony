@@ -86,10 +86,13 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const adminRouteChildren = {
+  AdminProdutosRoute: AdminProdutosRoute,
+}
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
-  AdminProdutosRoute: AdminProdutosRoute,
+  AdminRoute: AdminRoute._addFileChildren(adminRouteChildren),
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
