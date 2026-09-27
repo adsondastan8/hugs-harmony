@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link, useNavigate, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -11,7 +11,7 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim() || !password.trim()) return;
     navigate({ to: "/admin" });
