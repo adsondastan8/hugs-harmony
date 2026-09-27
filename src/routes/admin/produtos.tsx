@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { getCurrentUser } from "../lib/supabase-auth";
-import { createProduct, deleteProduct, listProducts, type Product } from "../lib/supabase-data";
+import { getCurrentUser } from "../../lib/supabase-auth";
+import { createProduct, deleteProduct, listProducts, type Product } from "../../lib/supabase-data";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: AdminProducts,
