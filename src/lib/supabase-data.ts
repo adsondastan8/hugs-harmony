@@ -1,7 +1,7 @@
 import { getStoredSession } from "./supabase-auth";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "https://szlybvrsgkybhmbhsgxz.supabase.co";
+const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ?? "sb_publishable_uR7KW7wwI3A4TK_7QusPBA_lr269kHL";
 
 function getConfig() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
