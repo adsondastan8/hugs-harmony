@@ -5,11 +5,11 @@ export const Route = createFileRoute("/admin")({
 });
 
 const cards = [
-  ["📦", "Produtos", "Cadastrar e gerir os produtos da loja."],
-  ["🛒", "Pedidos", "Ver e confirmar pedidos dos clientes."],
-  ["👥", "Clientes", "Consultar os clientes registados."],
-  ["📊", "Estatísticas", "Acompanhar o movimento da loja."],
-];
+  ["📦", "Produtos", "Cadastrar e gerir os produtos da loja.", "/admin/produtos"],
+  ["🛒", "Pedidos", "Ver e confirmar pedidos dos clientes.", null],
+  ["👥", "Clientes", "Consultar os clientes registados.", null],
+  ["📊", "Estatísticas", "Acompanhar o movimento da loja.", null],
+] as const;
 
 function AdminDashboard() {
   return (
@@ -36,14 +36,20 @@ function AdminDashboard() {
         </div>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map(([icon, title, description]) => (
+          {cards.map(([icon, title, description, path]) => (
             <article key={title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="text-3xl">{icon}</div>
               <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-              <button type="button" className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
-                Abrir módulo
-              </button>
+              {path ? (
+                <Link to={path} className="mt-5 inline-block rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
+                  Abrir módulo
+                </Link>
+              ) : (
+                <button type="button" disabled className="mt-5 cursor-not-allowed rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
+                  Em breve
+                </button>
+              )}
             </article>
           ))}
         </div>
@@ -51,7 +57,7 @@ function AdminDashboard() {
         <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
           <h3 className="text-xl font-bold text-slate-950">Próximas funções</h3>
           <p className="mt-2 text-slate-600">
-            Vamos ligar este painel ao Supabase e criar os módulos reais, começando pelo cadastro de produtos.
+            O próximo passo será ligar os produtos ao Supabase para que os dados fiquem guardados permanentemente.
           </p>
         </div>
       </section>
