@@ -58,10 +58,10 @@ async function supabaseAuthRequest(path: string, options: RequestInit = {}) {
   return data;
 }
 
-export async function signUp(email: string, password: string) {
+export async function signUp(email: string, password: string, name: string) {
   const data = await supabaseAuthRequest("/signup", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, data: { full_name: name } }),
   });
 
   if (data?.access_token) {
