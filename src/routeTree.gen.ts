@@ -10,7 +10,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AdminProdutosRouteImport } from './routes/admin-produtos'
+import { Route as AdminProdutosRouteImport } from './routes/admin/produtos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -27,7 +27,7 @@ const AdminRoute = AdminRouteImport.update({
 const AdminProdutosRoute = AdminProdutosRouteImport.update({
   id: '/admin/produtos',
   path: '/admin/produtos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
