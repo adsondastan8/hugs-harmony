@@ -7,7 +7,7 @@ export const Route = createFileRoute("/admin/produtos")({
   component: AdminProducts,
 });
 
-function AdminProducts() {
+export function AdminProducts() {
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
