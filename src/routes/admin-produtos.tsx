@@ -1,5 +1,6 @@
-import { FormEvent, useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { FormEvent, useEffect, useState } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { getCurrentUser } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: AdminProducts,
@@ -14,6 +15,34 @@ type Product = {
 };
 
 function AdminProducts() {
+  const navigate = useNavigate();
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkSession() {
+      const user = await getCurrentUser();
+      if (!user) {
+        navigate({ to: "/" });
+        return;
+      }
+      if (active) setCheckingSession(false);
+    }
+
+    void checkSession();
+    if (checkingSession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-900">
+        <p className="text-sm font-semibold text-slate-500">A verificar a sua sessão...</p>
+      </main>
+    );
+  }
+
+  return () => {
+      active = false;
+    };
+  }, [navigate]);
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
