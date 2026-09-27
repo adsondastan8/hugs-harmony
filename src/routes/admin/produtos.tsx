@@ -1,11 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { getCurrentUser } from "../../lib/supabase-auth";
 import { createProduct, deleteProduct, listProducts, type Product } from "../../lib/supabase-data";
 
-export const Route = createFileRoute("/admin/produtos")({
-  component: AdminProducts,
-});
 
 export function AdminProducts() {
   const navigate = useNavigate();
@@ -115,9 +112,9 @@ export function AdminProducts() {
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p>
             <h1 className="mt-1 text-2xl font-black">Produtos</h1>
           </div>
-          <Link to="/admin" className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800">
+          <button type="button" onClick={() => navigate({ to: "/admin" })} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800">
             Voltar ao painel
-          </Link>
+          </button>
         </div>
       </header>
 
