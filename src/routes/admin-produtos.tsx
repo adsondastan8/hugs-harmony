@@ -1,40 +1,103 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { getCurrentUser } from "../lib/supabase-auth";
+import { createProduct, deleteProduct, listProducts, type Product } from "../lib/supabase-data";
 
 export const Route = createFileRoute("/admin/produtos")({
   component: AdminProducts,
 });
 
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  price: string;
-  stock: string;
-};
-
 function AdminProducts() {
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Roupa");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    async function checkSession() {
+    async function load() {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          navigate({ to: "/" });
+          return;
+        }
+
+        const data = await listProducts();
+        if (active) setProducts(data);
+      } catch (loadError) {
+        if (active) setError(loadError instanceof Error ? loadError.message : "Não foi possível carregar os produtos.");
+      } finally {
+        if (active) {
+          setCheckingSession(false);
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  async function addProduct(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    const numericPrice = Number(price.replace(",", "."));
+    const numericStock = Number(stock);
+
+    if (!name.trim() || !Number.isFinite(numericPrice) || numericPrice < 0 || !Number.isInteger(numericStock) || numericStock < 0) {
+      setError("Preencha o nome, preço e estoque com valores válidos.");
+      return;
+    }
+
+    setSaving(true);
+    try {
       const user = await getCurrentUser();
       if (!user) {
         navigate({ to: "/" });
         return;
       }
-      if (active) setCheckingSession(false);
-    }
 
-    void checkSession();
-    return () => {
-      active = false;
-    };
-  }, [navigate]);
+      const product = await createProduct({
+        name: name.trim(),
+        category,
+        price: numericPrice,
+        stock: numericStock,
+        created_by: user.id,
+      });
+
+      setProducts((current) => [product, ...current]);
+      setName("");
+      setPrice("");
+      setStock("");
+      setShowForm(false);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Não foi possível guardar o produto.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeProduct(id: string) {
+    setError("");
+    try {
+      await deleteProduct(id);
+      setProducts((current) => current.filter((product) => product.id !== id));
+    } catch (removeError) {
+      setError(removeError instanceof Error ? removeError.message : "Não foi possível remover o produto.");
+    }
+  }
 
   if (checkingSession) {
     return (
@@ -42,31 +105,6 @@ function AdminProducts() {
         <p className="text-sm font-semibold text-slate-500">A verificar a sua sessão...</p>
       </main>
     );
-  }
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("Roupa");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
-
-  function addProduct(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!name.trim() || !price.trim() || !stock.trim()) return;
-
-    setProducts((current) => [
-      ...current,
-      { id: Date.now(), name: name.trim(), category, price: price.trim(), stock: stock.trim() },
-    ]);
-    setName("");
-    setPrice("");
-    setStock("");
-    setShowForm(false);
-  }
-
-  function removeProduct(id: number) {
-    setProducts((current) => current.filter((product) => product.id !== id));
   }
 
   return (
@@ -88,12 +126,16 @@ function AdminProducts() {
           <div>
             <p className="text-sm font-semibold text-slate-500">Gestão da loja</p>
             <h2 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Meus produtos</h2>
-            <p className="mt-3 text-slate-600">Cadastre os produtos que ficarão disponíveis para os clientes.</p>
+            <p className="mt-3 text-slate-600">Agora os produtos ficam guardados permanentemente no Supabase.</p>
           </div>
           <button type="button" onClick={() => setShowForm((value) => !value)} className="rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white hover:bg-slate-800">
             {showForm ? "Fechar formulário" : "+ Adicionar produto"}
           </button>
         </div>
+
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>
+        )}
 
         {showForm && (
           <form onSubmit={addProduct} className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -121,12 +163,16 @@ function AdminProducts() {
                 <input required value={stock} onChange={(e) => setStock(e.target.value)} inputMode="numeric" placeholder="Ex.: 10" className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-950" />
               </label>
             </div>
-            <button type="submit" className="mt-6 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white hover:bg-slate-800">Guardar produto</button>
+            <button type="submit" disabled={saving} className="mt-6 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white hover:bg-slate-800 disabled:opacity-60">
+              {saving ? "A guardar..." : "Guardar produto"}
+            </button>
           </form>
         )}
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {products.length === 0 ? (
+          {loading ? (
+            <div className="p-10 text-center text-sm font-semibold text-slate-500">A carregar produtos...</div>
+          ) : products.length === 0 ? (
             <div className="p-10 text-center">
               <div className="text-4xl">📦</div>
               <h3 className="mt-4 text-xl font-bold">Ainda não há produtos</h3>
@@ -141,8 +187,8 @@ function AdminProducts() {
                     <p className="mt-1 text-sm text-slate-500">{product.category} · {product.stock} em estoque</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="font-bold">{product.price} MT</span>
-                    <button type="button" onClick={() => removeProduct(product.id)} className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Remover</button>
+                    <span className="font-bold">{Number(product.price).toLocaleString("pt-MZ")} MT</span>
+                    <button type="button" onClick={() => void removeProduct(product.id)} className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">Remover</button>
                   </div>
                 </div>
               ))}
