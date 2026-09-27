@@ -31,7 +31,12 @@ function AdminProducts() {
     }
 
     void checkSession();
-    if (checkingSession) {
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  if (checkingSession) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-900">
         <p className="text-sm font-semibold text-slate-500">A verificar a sua sessão...</p>
@@ -39,10 +44,6 @@ function AdminProducts() {
     );
   }
 
-  return () => {
-      active = false;
-    };
-  }, [navigate]);
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
