@@ -8,7 +8,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 const cards = [
-  ["📦", "Produtos", "Cadastrar e gerir os produtos da loja.", "/admin/produtos"],
+  ["📦", "Produtos", "Cadastrar e gerir os produtos da loja.", "produtos"],
   ["🛒", "Pedidos", "Ver e confirmar pedidos dos clientes.", null],
   ["👥", "Clientes", "Consultar os clientes registados.", null],
   ["📊", "Estatísticas", "Acompanhar o movimento da loja.", null],
@@ -52,19 +52,30 @@ function AdminDashboard() {
     };
   }, [navigate]);
 
-  async function openProducts() {
+  useEffect(() => {
+    if (module !== "produtos") return;
+
+    let active = true;
     setProductError("");
-    setModule("produtos");
     setProductLoading(true);
-    try {
-      const data = await listProducts();
-      setProducts(data);
-    } catch (e) {
-      setProductError(e instanceof Error ? e.message : "Não foi possível carregar os produtos.");
-    } finally {
-      setProductLoading(false);
-    }
-  }
+
+    void listProducts()
+      .then((data) => {
+        if (active) setProducts(data);
+      })
+      .catch((e) => {
+        if (active) {
+          setProductError(e instanceof Error ? e.message : "Não foi possível carregar os produtos.");
+        }
+      })
+      .finally(() => {
+        if (active) setProductLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [module]);
 
   async function addProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -158,13 +169,13 @@ function AdminDashboard() {
         </div>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map(([icon, title, description, path]) => (
+          {cards.map(([icon, title, description, action]) => (
             <article key={title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="text-3xl">{icon}</div>
               <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-              {path ? (
-                <button type="button" onClick={() => void openProducts()} className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
+              {action ? (
+                <button type="button" onClick={() => setModule("produtos")} className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
                   Abrir módulo
                 </button>
               ) : (
