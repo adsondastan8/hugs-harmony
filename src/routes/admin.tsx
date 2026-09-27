@@ -1,4 +1,6 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { getCurrentUser, signOut } from "../lib/supabase-auth";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
@@ -12,17 +14,59 @@ const cards = [
 ] as const;
 
 function AdminDashboard() {
+  const navigate = useNavigate();
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkSession() {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          navigate({ to: "/" });
+          return;
+        }
+        if (active) setEmail(user.email ?? "");
+      } catch {
+        navigate({ to: "/" });
+      } finally {
+        if (active) setCheckingSession(false);
+      }
+    }
+
+    void checkSession();
+    return () => {
+      active = false;
+    };
+  }, [navigate]);
+
+  async function handleLogout() {
+    await signOut();
+    navigate({ to: "/" });
+  }
+
+  if (checkingSession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-900">
+        <p className="text-sm font-semibold text-slate-500">A verificar a sua sessão...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-100 text-slate-900">
       <header className="border-b border-slate-200 bg-slate-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p>
             <h1 className="mt-1 text-2xl font-black">Painel do ADM</h1>
+            {email && <p className="mt-1 text-xs text-slate-400">{email}</p>}
           </div>
-          <Link to="/" className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800">
+          <button type="button" onClick={handleLogout} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800">
             Sair
-          </Link>
+          </button>
         </div>
       </header>
 
