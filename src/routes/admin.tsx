@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { getCurrentUser, signOut } from "../lib/supabase-auth";
-import { AdminProducts } from "./admin/produtos";
+import { AdminProducts } from "../components/AdminProducts";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
