@@ -1,12 +1,21 @@
 import { useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, useNavigate, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: AdminLogin,
 });
 
 function AdminLogin() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!email.trim() || !password.trim()) return;
+    navigate({ to: "/admin" });
+  }
 
   return (
     <main className="min-h-screen bg-slate-100 px-5 py-10 text-slate-900 sm:px-8">
@@ -20,27 +29,27 @@ function AdminLogin() {
             </p>
           </div>
 
-          <form className="mt-8 space-y-5" onSubmit={(event) => event.preventDefault()}>
+          <form className="mt-8 space-y-5" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="admin-email" className="mb-2 block text-sm font-semibold text-slate-700">
-                E-mail
-              </label>
+              <label htmlFor="admin-email" className="mb-2 block text-sm font-semibold text-slate-700">E-mail</label>
               <input
                 id="admin-email"
                 type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="admin@adsonfashion.com"
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
               />
             </div>
 
             <div>
-              <label htmlFor="admin-password" className="mb-2 block text-sm font-semibold text-slate-700">
-                Palavra-passe
-              </label>
+              <label htmlFor="admin-password" className="mb-2 block text-sm font-semibold text-slate-700">Palavra-passe</label>
               <div className="relative">
                 <input
                   id="admin-password"
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="Digite a sua palavra-passe"
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3.5 pr-20 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-200"
                 />
@@ -64,7 +73,7 @@ function AdminLogin() {
 
           <div className="mt-7 border-t border-slate-200 pt-6 text-center">
             <p className="text-xs leading-5 text-slate-500">
-              Esta área é exclusiva para a administração da Adson Fashion.
+              Esta versão é apenas para testar o acesso ao painel. A autenticação real será ligada ao Supabase depois.
             </p>
             <Link to="/" className="mt-3 inline-block text-sm font-semibold text-slate-700 hover:underline">
               Área da loja
