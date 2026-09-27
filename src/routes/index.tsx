@@ -1,5 +1,5 @@
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -36,10 +36,20 @@ function Index() {
         {menuOpen && (
           <div className="absolute right-5 top-[76px] w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl sm:right-8">
             <nav aria-label="Menu principal" className="space-y-1">
+              <button type="button" className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-medium text-slate-700 transition hover:bg-slate-100">
+                👤 Criar conta
+              </button>
+              <button type="button" className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-medium text-slate-700 transition hover:bg-slate-100">
+                🔐 Fazer login
+              </button>
+              <Link
+                to="/produtos"
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+              >
+                🛍️ Produtos
+              </Link>
               {[
-                ["👤", "Criar conta"],
-                ["🔐", "Fazer login"],
-                ["🛍️", "Produtos"],
                 ["🛒", "Meu carrinho"],
                 ["❤️", "Favoritos"],
                 ["📦", "Meus pedidos"],
@@ -68,9 +78,9 @@ function Index() {
             Descubra roupas e acessórios para expressar o seu estilo. Uma nova forma de conhecer a nossa loja e encontrar aquilo que combina consigo.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <button type="button" className="rounded-xl bg-slate-950 px-6 py-3.5 font-bold text-white transition hover:bg-slate-800">
+            <Link to="/produtos" className="rounded-xl bg-slate-950 px-6 py-3.5 font-bold text-white transition hover:bg-slate-800">
               Ver produtos
-            </button>
+            </Link>
             <button type="button" className="rounded-xl border border-slate-300 px-6 py-3.5 font-bold text-slate-900 transition hover:bg-slate-100">
               Conhecer a loja
             </button>
