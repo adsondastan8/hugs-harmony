@@ -85,6 +85,39 @@ function Index() {
           </div>
         </div>
       </section>
+
+      <section className="border-y border-slate-200 bg-slate-50 px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500">Conheça a nossa loja</p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">Sobre a Adson Fashion</h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">
+              A Adson Fashion é uma loja dedicada a trazer roupas e acessórios para diferentes estilos e ocasiões. Aqui, queremos tornar mais simples encontrar peças que combinem com a sua personalidade e com o seu dia a dia.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+            {[
+              ["👕", "Variedade", "Roupas e acessórios para diferentes estilos."],
+              ["✨", "Estilo", "Peças para ajudar você a criar o seu próprio visual."],
+              ["🤝", "Atendimento", "Uma experiência simples e próxima para os nossos clientes."],
+            ].map(([icon, title, description]) => (
+              <article key={title} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+                <div className="text-3xl">{icon}</div>
+                <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
+                <p className="mt-2 leading-7 text-slate-600">{description}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-3xl bg-slate-950 px-7 py-10 text-center text-white sm:px-10">
+            <p className="text-2xl font-black sm:text-3xl">Vista o seu estilo. Viva a sua moda.</p>
+            <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+              Explore a Adson Fashion e descubra peças que podem fazer parte do seu próximo visual.
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
