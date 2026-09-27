@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { getCurrentUser, signOut } from "../lib/supabase-auth";
+import { AdminProducts } from "./admin/produtos";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
@@ -17,6 +18,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
   const [email, setEmail] = useState("");
+  const [module, setModule] = useState<"dashboard" | "produtos">("dashboard");
 
   useEffect(() => {
     let active = true;
