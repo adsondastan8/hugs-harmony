@@ -68,19 +68,29 @@ export async function subscribeDeliveryPush(deliveryId: string) {
       {
         method: "POST",
         signal: controller.signal,
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates,return=minimal",
+        },
+        body: JSON.stringify({
+          delivery_id: deliveryId,
+          endpoint: json.endpoint,
+          p256dh,
+          auth,
+          updated_at: new Date().toISOString(),
+        }),
       },
-      body: JSON.stringify({
-        delivery_id: deliveryId,
-        endpoint: json.endpoint,
-        p256dh,
-        auth,
-      }),
-    },
-  );
+    );
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("O registo do Push demorou demasiado. Atualize a página e tente novamente.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     const details = await response.text().catch(() => "");
