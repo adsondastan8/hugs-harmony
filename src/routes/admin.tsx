@@ -50,6 +50,7 @@ function AdminDashboard() {
   const [productSaving, setProductSaving] = useState(false);
   const [productError, setProductError] = useState("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [productFormOpen, setProductFormOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productCategory, setProductCategory] = useState("Roupa");
   const [productPrice, setProductPrice] = useState("");
@@ -191,6 +192,12 @@ function AdminDashboard() {
     setProductImage(null);
   }
 
+  function startCreatingProduct() {
+    resetProductForm();
+    setProductFormOpen(true);
+    setProductError("");
+  }
+
   function startEditing(product: Product) {
     setEditingProductId(product.id);
     setProductName(product.name);
@@ -201,7 +208,7 @@ function AdminDashboard() {
     setProductSizes((product.sizes ?? []).join(", "));
     setProductImage(null);
     setProductError("");
-    document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setProductFormOpen(true);
   }
 
   async function saveProduct(event: FormEvent<HTMLFormElement>) {
@@ -281,6 +288,7 @@ function AdminDashboard() {
       }
 
       resetProductForm();
+      setProductFormOpen(false);
     } catch (e) {
       setProductError(e instanceof Error ? e.message : "Não foi possível guardar o produto.");
     } finally {
@@ -295,7 +303,10 @@ function AdminDashboard() {
     try {
       await deleteProduct(id);
       setProducts((items) => items.filter((product) => product.id !== id));
-      if (editingProductId === id) resetProductForm();
+      if (editingProductId === id) {
+        resetProductForm();
+        setProductFormOpen(false);
+      }
     } catch (e) {
       setProductError(e instanceof Error ? e.message : "Não foi possível remover o produto.");
     }
@@ -408,12 +419,15 @@ function AdminDashboard() {
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p>
-              <h1 className="mt-1 text-2xl font-black">Gestão de produtos</h1>
+              <h1 className="mt-1 text-2xl font-black">
+                {productFormOpen ? (editingProductId ? "Editar produto" : "Novo produto") : "Produtos"}
+              </h1>
             </div>
             <button
               type="button"
               onClick={() => {
                 resetProductForm();
+                setProductFormOpen(false);
                 setModule("dashboard");
               }}
               className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold"
@@ -424,212 +438,248 @@ function AdminDashboard() {
         </header>
 
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-          <div id="product-form" className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-sm">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#756F67]">
-                  {editingProductId ? "Editar produto" : "Novo produto"}
-                </p>
-                <h2 className="mt-1 text-3xl font-black">
-                  {editingProductId ? "Atualizar produto" : "Adicionar produto"}
-                </h2>
+          {!productFormOpen ? (
+            <>
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8905A]">Catálogo</p>
+                  <h2 className="mt-2 text-3xl font-black">Produtos criados</h2>
+                  <p className="mt-2 text-sm text-[#756F67]">Toque num produto para editar. Use + para criar um novo.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={startCreatingProduct}
+                  aria-label="Adicionar novo produto"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#171512] text-3xl font-light text-white shadow-lg"
+                >
+                  +
+                </button>
               </div>
-              <div className="flex flex-wrap gap-3">
+
+              {productError && (
+                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {productError}
+                </div>
+              )}
+
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {productLoading ? (
+                  <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-8 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
+                    A carregar produtos...
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-[#D9CEBF] bg-[#FFFCF7] p-10 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
+                    <p className="text-4xl">📦</p>
+                    <p className="mt-3 font-bold">Ainda não há produtos.</p>
+                    <button
+                      type="button"
+                      onClick={startCreatingProduct}
+                      className="mt-5 rounded-xl bg-[#171512] px-5 py-3 text-sm font-bold text-white"
+                    >
+                      + Criar primeiro produto
+                    </button>
+                  </div>
+                ) : (
+                  products.map((product) => (
+                    <article
+                      key={product.id}
+                      onClick={() => startEditing(product)}
+                      className="cursor-pointer overflow-hidden rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="h-52 w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-52 items-center justify-center bg-[#F5F1E8] text-5xl">
+                          🛍️
+                        </div>
+                      )}
+
+                      <div className="p-5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-lg font-black">{product.name}</h3>
+                            <p className="mt-1 text-sm text-[#756F67]">{product.category}</p>
+                          </div>
+                          <p className="text-lg font-black">
+                            {Number(product.price).toLocaleString("pt-MZ")} MT
+                          </p>
+                        </div>
+
+                        <div className="mt-4 rounded-xl bg-[#F5F1E8] px-4 py-3">
+                          <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Estoque</p>
+                          <p className="mt-1 text-xl font-black">{product.stock} unidades</p>
+                        </div>
+
+                        <div className="mt-5 flex items-center justify-between gap-3">
+                          <span className="text-sm font-bold text-[#756F67]">Toque para editar</span>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void removeProduct(product.id);
+                            }}
+                            className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                )}
+              </div>
+            </>
+          ) : (
+            <div id="product-form" className="mx-auto max-w-3xl rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8905A]">
+                    {editingProductId ? "Editar produto" : "Novo produto"}
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black">
+                    {editingProductId ? productName || "Produto" : "Criar produto"}
+                  </h2>
+                  <p className="mt-2 text-sm text-[#756F67]">
+                    {editingProductId ? "Altere os dados deste produto e guarde as mudanças." : "Preencha os dados para adicionar um produto ao catálogo."}
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => {
                     resetProductForm();
-                    document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    setProductFormOpen(false);
                   }}
-                  className="rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#D9CEBF] text-xl"
+                  aria-label="Fechar formulário"
                 >
-                  + Adicionar produto
+                  ×
                 </button>
-                {editingProductId && (
+              </div>
+
+              {productError && (
+                <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {productError}
+                </div>
+              )}
+
+              <form onSubmit={saveProduct} className="mt-7">
+                <div className="grid gap-5 md:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Nome
+                    <input
+                      required
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      placeholder="Nome do produto"
+                      className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Categoria
+                    <select
+                      value={productCategory}
+                      onChange={(e) => setProductCategory(e.target.value)}
+                      className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 font-normal"
+                    >
+                      <option>Roupa</option>
+                      <option>Calçado</option>
+                      <option>Acessório</option>
+                      <option>Outro</option>
+                    </select>
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Preço (MT)
+                    <input
+                      required
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      inputMode="decimal"
+                      placeholder="Ex.: 1999"
+                      className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Estoque
+                    <input
+                      required
+                      value={productStock}
+                      onChange={(e) => setProductStock(e.target.value)}
+                      inputMode="numeric"
+                      placeholder="Quantidade disponível"
+                      className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Cores disponíveis
+                    <input
+                      value={productColors}
+                      onChange={(e) => setProductColors(e.target.value)}
+                      placeholder="Ex.: Preto, Branco, Azul, Vermelho"
+                      className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
+                    />
+                    <span className="text-xs font-normal text-[#756F67]">Separe as cores por vírgulas.</span>
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold">
+                    Tamanhos disponíveis
+                    <input
+                      value={productSizes}
+                      onChange={(e) => setProductSizes(e.target.value)}
+                      placeholder="Ex.: S, M, L, XL, XXL"
+                      className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
+                    />
+                    <span className="text-xs font-normal text-[#756F67]">Separe os tamanhos por vírgulas.</span>
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold md:col-span-2">
+                    Foto do produto
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      onChange={(e) => setProductImage(e.target.files?.[0] ?? null)}
+                      className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 text-sm font-normal"
+                    />
+                    <span className="text-xs font-normal text-[#756F67]">
+                      JPG, PNG, WEBP ou GIF — máximo 6 MB.
+                      {productImage ? ` Selecionada: ${productImage.name}` : ""}
+                    </span>
+                  </label>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    disabled={productSaving}
+                    className="rounded-xl bg-[#171512] px-6 py-3 font-bold text-white disabled:opacity-60"
+                  >
+                    {productSaving
+                      ? "A guardar..."
+                      : editingProductId
+                        ? "Guardar alterações"
+                        : "Guardar produto"}
+                  </button>
                   <button
                     type="button"
-                    onClick={resetProductForm}
-                    className="rounded-xl border border-[#D9CEBF] px-4 py-2.5 text-sm font-bold"
+                    onClick={() => {
+                      resetProductForm();
+                      setProductFormOpen(false);
+                    }}
+                    className="rounded-xl border border-[#D9CEBF] px-6 py-3 font-bold"
                   >
-                    Cancelar edição
+                    Cancelar
                   </button>
-                )}
-              </div>
-            </div>
-
-            {productError && (
-              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                {productError}
-              </div>
-            )}
-
-            <form onSubmit={saveProduct} className="mt-7">
-              <div className="grid gap-5 md:grid-cols-2">
-                <label className="grid gap-2 text-sm font-semibold">
-                  Nome
-                  <input
-                    required
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    placeholder="Nome do produto"
-                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
-                  />
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold">
-                  Categoria
-                  <select
-                    value={productCategory}
-                    onChange={(e) => setProductCategory(e.target.value)}
-                    className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 font-normal"
-                  >
-                    <option>Roupa</option>
-                    <option>Calçado</option>
-                    <option>Acessório</option>
-                    <option>Outro</option>
-                  </select>
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold">
-                  Preço (MT)
-                  <input
-                    required
-                    value={productPrice}
-                    onChange={(e) => setProductPrice(e.target.value)}
-                    inputMode="decimal"
-                    placeholder="Ex.: 1999"
-                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
-                  />
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold">
-                  Estoque
-                  <input
-                    required
-                    value={productStock}
-                    onChange={(e) => setProductStock(e.target.value)}
-                    inputMode="numeric"
-                    placeholder="Quantidade disponível"
-                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
-                  />
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold">
-                  Cores disponíveis
-                  <input value={productColors} onChange={(e) => setProductColors(e.target.value)} placeholder="Ex.: Preto, Branco, Azul, Vermelho" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" />
-                  <span className="text-xs font-normal text-[#756F67]">Separe as cores por vírgulas.</span>
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold">
-                  Tamanhos disponíveis
-                  <input value={productSizes} onChange={(e) => setProductSizes(e.target.value)} placeholder="Ex.: S, M, L, XL, XXL" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" />
-                  <span className="text-xs font-normal text-[#756F67]">Separe os tamanhos por vírgulas.</span>
-                </label>
-
-                <label className="grid gap-2 text-sm font-semibold md:col-span-2">
-                  Foto do produto
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    onChange={(e) => setProductImage(e.target.files?.[0] ?? null)}
-                    className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 text-sm font-normal"
-                  />
-                  <span className="text-xs font-normal text-[#756F67]">
-                    JPG, PNG, WEBP ou GIF — máximo 6 MB.
-                    {productImage ? ` Selecionada: ${productImage.name}` : ""}
-                  </span>
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={productSaving}
-                className="mt-6 rounded-xl bg-[#171512] px-6 py-3 font-bold text-white disabled:opacity-60"
-              >
-                {productSaving
-                  ? "A guardar..."
-                  : editingProductId
-                    ? "Guardar alterações"
-                    : "Guardar produto"}
-              </button>
-            </form>
-          </div>
-
-          <div className="mt-8">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-2xl font-black">Produtos cadastrados</h2>
-              <span className="rounded-full bg-[#EEE8DE] px-3 py-1 text-sm font-bold">
-                {products.length}
-              </span>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {productLoading ? (
-                <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-8 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
-                  A carregar produtos...
                 </div>
-              ) : products.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-[#D9CEBF] bg-[#FFFCF7] p-8 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
-                  Ainda não há produtos.
-                </div>
-              ) : (
-                products.map((product) => (
-                  <article
-                    key={product.id}
-                    className="overflow-hidden rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] shadow-sm"
-                  >
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="h-52 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-52 items-center justify-center bg-[#F5F1E8] text-5xl">
-                        🛍️
-                      </div>
-                    )}
-
-                    <div className="p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="text-lg font-black">{product.name}</h3>
-                          <p className="mt-1 text-sm text-[#756F67]">{product.category}</p>
-                        </div>
-                        <p className="text-lg font-black">
-                          {Number(product.price).toLocaleString("pt-MZ")} MT
-                        </p>
-                      </div>
-
-                      <div className="mt-4 rounded-xl bg-[#F5F1E8] px-4 py-3">
-                        <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Estoque</p>
-                        <p className="mt-1 text-xl font-black">{product.stock} unidades</p>
-                      </div>
-
-                      <div className="mt-5 flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            startEditing(product);
-                          }}
-                          className="flex-1 rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void removeProduct(product.id)}
-                          className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600"
-                        >
-                          Remover
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                ))
-              )}
+              </form>
             </div>
-          </div>
+          )}
         </section>
       </main>
     );
