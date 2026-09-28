@@ -29,15 +29,25 @@ export async function subscribeDeliveryPush(deliveryId: string) {
     (await navigator.serviceWorker.getRegistration("/")) ??
     (await navigator.serviceWorker.ready);
 
-  await registration.update();
+  if (!registration.active) {
+    throw new Error("O Service Worker ainda está a iniciar. Feche e abra novamente a página e tente outra vez.");
+  }
 
   let subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {
-    subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
+    try {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+    } catch (error) {
+      throw new Error(
+        error instanceof Error
+          ? `O Chrome não conseguiu ativar o Push: ${error.message}`
+          : "O Chrome não conseguiu ativar o Push."
+      );
+    }
   }
 
   const json = subscription.toJSON();
@@ -70,7 +80,9 @@ export async function subscribeDeliveryPush(deliveryId: string) {
 
   if (!response.ok) {
     const details = await response.text().catch(() => "");
-    throw new Error(details || "Não foi possível guardar o dispositivo para receber notificações.");
+    throw new Error(
+      `Supabase recusou o registo do dispositivo (${response.status}). ${details || "Verifique o acesso do delivery."}`
+    );
   }
 
   return subscription;
