@@ -57,7 +57,7 @@ export type DeliveryProfile = {
 
 export async function listDeliveryProfiles() {
   const response = await fetch(
-    `${SUPABASE_URL.replace(/\\/$/, "")}/rest/v1/delivery_profiles?select=id,name,phone,is_online&order=name.asc`,
+    `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/delivery_profiles?select=id,name,phone,is_online&order=name.asc`,
     { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" } },
   );
   if (!response.ok) throw new Error("Não foi possível carregar a disponibilidade dos deliveries.");
