@@ -8,7 +8,7 @@ type DeliveryZone = "cidade" | "bairro";
 
 // Delivery WhatsApp routing: selected online delivery receives the order directly
 const CART_KEY = "adson-fashion-cart";
-const STORE_WHATSAPP_NUMBER = "258853131247";
+
 const CITY_DELIVERY_FEE = 0;
 const NEAR_DELIVERY_FEE = 50;
 const MID_DELIVERY_FEE = 80;
@@ -143,7 +143,8 @@ function CheckoutPage() {
 
       sessionStorage.removeItem(CART_KEY);
       const messageWithOrder = `${message}\n\nNúmero da encomenda: #${orderId.slice(0, 8).toUpperCase()}`;
-      window.location.href = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(messageWithOrder)}`;
+      const deliveryWhatsAppNumber = selectedDelivery.phone.replace(/\D/g, "");
+      window.location.href = `https://wa.me/${deliveryWhatsAppNumber}?text=${encodeURIComponent(messageWithOrder)}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível gravar a encomenda. Tente novamente.");
     }
