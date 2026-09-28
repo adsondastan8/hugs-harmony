@@ -22,6 +22,7 @@ export type CheckoutOrderInput = {
   total: number;
   notes?: string;
   items: Array<{ productId: string; quantity: number; color?: string; size?: string }>;
+  deliveryId?: string;
 };
 
 export async function createCheckoutOrder(input: CheckoutOrderInput) {
@@ -46,6 +47,7 @@ export async function createCheckoutOrder(input: CheckoutOrderInput) {
           selected_color: item.color ?? null,
           selected_size: item.size ?? null,
         })),
+        p_delivery_id: input.deliveryId ?? null,
       }),
     },
   );
