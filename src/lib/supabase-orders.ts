@@ -7,6 +7,55 @@ const SUPABASE_ANON_KEY =
   (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ??
   "sb_publishable_uR7KW7wwI3A4TK_7QusPBA_lr269kHL";
 
+
+const PUBLIC_SUPABASE_URL =
+  (import.meta.env.VITE_SUPABASE_URL as string | undefined) ??
+  "https://szlybvrsgkybhmbhsgxz.supabase.co";
+const PUBLIC_SUPABASE_ANON_KEY =
+  (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ??
+  "sb_publishable_uR7KW7wwI3A4TK_7QusPBA_lr269kHL";
+
+export type CheckoutOrderInput = {
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  total: number;
+  notes?: string;
+  items: Array<{ productId: string; quantity: number }>;
+};
+
+export async function createCheckoutOrder(input: CheckoutOrderInput) {
+  const response = await fetch(
+    `${PUBLIC_SUPABASE_URL.replace(/\/$/, "")}/rest/v1/rpc/create_checkout_order`,
+    {
+      method: "POST",
+      headers: {
+        apikey: PUBLIC_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${PUBLIC_SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_customer_name: input.customerName,
+        p_customer_phone: input.customerPhone,
+        p_delivery_address: input.deliveryAddress,
+        p_total: input.total,
+        p_notes: input.notes ?? "",
+        p_items: input.items.map((item) => ({
+          product_id: item.productId,
+          quantity: item.quantity,
+        })),
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || data?.hint || data?.details || "Não foi possível gravar a encomenda.");
+  }
+
+  return (await response.json()) as string;
+}
+
 export type OrderStatus = "pending" | "confirmed" | "sent" | "delivered" | "cancelled";
 
 export type Order = {
