@@ -83,7 +83,7 @@ function StoreHome() {
 
       <section id="entrega" className="mx-auto max-w-7xl px-4 py-2 pb-10 sm:px-6">
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl bg-[#fffdf9] p-5 shadow-sm"><p className="text-lg">🚚</p><h2 className="mt-2 text-base font-black">Entrega transparente</h2><p className="mt-1.5 text-xs leading-5 text-[#776e62]">Dentro da cidade, a entrega é grátis. Para bairros, aplica-se uma taxa fixa de 70 MT.</p></div>
+          <div className="rounded-2xl bg-[#fffdf9] p-5 shadow-sm"><p className="text-lg">🚚</p><h2 className="mt-2 text-base font-black">Entrega transparente</h2><p className="mt-1.5 text-xs leading-5 text-[#776e62]">Escolha o seu local no checkout. Popular, Muchenga, N&apos;zinje, Estação, Cerâmica e Chiuaula: 50 MT. Sanjala, Namacula, Chiulugo, 23 de Setembro e Massenger: 80 MT. Mercado, serviço ou outro local: 80 MT.</p></div>
           <div className="rounded-2xl bg-[#fffdf9] p-5 shadow-sm"><p className="text-lg">💳</p><h2 className="mt-2 text-base font-black">Pagamento na entrega</h2><p className="mt-1.5 text-xs leading-5 text-[#776e62]">Não precisa pagar online. O pagamento é feito quando receber a encomenda.</p></div>
         </div>
       </section>
