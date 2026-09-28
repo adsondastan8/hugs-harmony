@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { listPublicProducts, type Product } from "../lib/supabase-data";
+import { listPublicProducts, listDeliveryProfiles, type DeliveryProfile, type Product } from "../lib/supabase-data";
 import { createCheckoutOrder } from "../lib/supabase-orders";
 
 type CartItem = { productId: string; quantity: number; color?: string; size?: string };
@@ -40,6 +40,7 @@ function CheckoutPage() {
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("bairro");
   const [deliveryPlace, setDeliveryPlace] = useState<"bairro" | "ponto">("bairro");
   const [selectedDeliveryId, setSelectedDeliveryId] = useState("");
+  const [deliveries, setDeliveries] = useState<DeliveryProfile[]>([]);
 
   const neighborhoodFee = NEAR_NEIGHBORHOODS.includes(neighborhood) ? NEAR_DELIVERY_FEE : MID_NEIGHBORHOODS.includes(neighborhood) ? MID_DELIVERY_FEE : MID_DELIVERY_FEE;
   const [error, setError] = useState("");
@@ -47,6 +48,10 @@ function CheckoutPage() {
   useEffect(() => {
     setCart(readCart());
     void listPublicProducts().then(setProducts).catch(() => setError("Não foi possível carregar o seu pedido."));
+    const refreshDeliveries = () => { void listDeliveryProfiles().then(setDeliveries).catch(() => setDeliveries([])); };
+    refreshDeliveries();
+    const timer = window.setInterval(refreshDeliveries, 10000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const lines = cart.map((item) => {
@@ -79,8 +84,8 @@ function CheckoutPage() {
       return;
     }
 
-    const selectedDelivery = DELIVERY_CONTACTS.find((delivery) => delivery.id === selectedDeliveryId);
-    if (!selectedDelivery) { setError("Selecione um delivery disponível."); return; }
+    const selectedDelivery = deliveries.find((delivery) => delivery.id === selectedDeliveryId && delivery.is_online);
+    if (!selectedDelivery) { setError("Selecione um delivery que esteja online."); return; }
 
     const message = [
       "🛍️ *ADSON FASHION*",
@@ -238,26 +243,29 @@ function CheckoutPage() {
                         <h3 className="mt-1 text-lg font-black">Escolha quem vai fazer a sua entrega</h3>
                         <p className="mt-1 text-xs leading-5 text-[#776e62]">Selecione um dos deliveries disponíveis. A sua escolha será enviada juntamente com a encomenda pelo WhatsApp.</p>
                       </div>
-                      <span className="hidden rounded-full bg-[#f4efe6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8b6b2f] sm:block">Disponível</span>
+                      <span className="hidden rounded-full bg-[#f4efe6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8b6b2f] sm:block">{deliveries.filter((delivery) => delivery.is_online).length} online</span>
                     </div>
                     <div className="mt-4 grid gap-3">
-                      {DELIVERY_CONTACTS.map((delivery) => {
+                      {deliveries.map((delivery) => {
                         const selected = selectedDeliveryId === delivery.id;
                         return (
                           <button
                             key={delivery.id}
                             type="button"
-                            onClick={() => setSelectedDeliveryId(delivery.id)}
-                            className={`flex items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${selected ? "border-[#17130d] bg-[#17130d] text-white shadow-md" : "border-[#e5dccd] bg-[#fffdf9] hover:border-[#a88745]"}`}
+                            onClick={() => delivery.is_online && setSelectedDeliveryId(delivery.id)}
+                            disabled={!delivery.is_online}
+                            className={`flex items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${selected ? "border-[#17130d] bg-[#17130d] text-white shadow-md" : delivery.is_online ? "border-[#e5dccd] bg-[#fffdf9] hover:border-[#a88745]" : "cursor-not-allowed border-[#e5dccd] bg-[#f2eee7] opacity-65"}`}
                           >
                             <span>
                               <span className="block text-sm font-black">{delivery.name}</span>
                               <span className={`mt-1 block text-xs ${selected ? "text-white/70" : "text-[#776e62]"}`}>{delivery.phone}</span>
+                              <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-bold ${selected ? "text-white" : delivery.is_online ? "text-green-700" : "text-red-700"}`}><span className={`h-2 w-2 rounded-full ${delivery.is_online ? "bg-green-500" : "bg-red-500"}`} />{delivery.is_online ? "Online — disponível" : "Offline — indisponível"}</span>
                             </span>
                             <span className={`flex h-7 w-7 items-center justify-center rounded-full border text-sm font-black ${selected ? "border-white bg-white text-[#17130d]" : "border-[#d8cdbb]"}`}>{selected ? "✓" : ""}</span>
                           </button>
                         );
                       })}
+                      {deliveries.length === 0 && <p className="rounded-xl bg-[#faf7f1] p-4 text-sm font-semibold text-[#776e62]">Nenhum delivery disponível neste momento.</p>}
                     </div>
                   </div>
                   <label className="text-sm font-bold sm:col-span-2">Observação <span className="font-normal text-[#9a8f80]">(opcional)</span><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Alguma referência ou pedido especial?" className={fieldClass} /></label>
