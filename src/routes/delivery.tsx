@@ -70,18 +70,20 @@ function DeliveryPage() {
     if (permission !== "granted") setError("Permita as notificações do navegador para receber avisos de novas encomendas.");
   }
 
-  function notifyNewOrder(order: DeliveryOrder) {
+  async function notifyNewOrder(order: DeliveryOrder) {
     if (typeof window === "undefined" || !("Notification" in window) || Notification.permission !== "granted") return;
-    const notification = new Notification("Nova encomenda — Adson Fashion", {
-      body: `Cliente: ${order.customer_name}\nTotal: ${money(Number(order.total))} MT\nEntrega: ${order.delivery_address}`,
-      tag: `adson-fashion-order-${order.id}`,
-      icon: "/adson-fashion-icon.svg",
-    });
-    notification.onclick = () => {
-      window.focus();
-      setActiveOrder(order.id);
-      notification.close();
-    };
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification("Nova encomenda — Adson Fashion", {
+        body: `Cliente: ${order.customer_name}\nTotal: ${money(Number(order.total))} MT\nEntrega: ${order.delivery_address}`,
+        tag: `adson-fashion-order-${order.id}`,
+        icon: "/adson-fashion-icon.svg",
+        badge: "/adson-fashion-icon.svg",
+        data: { orderId: order.id },
+      });
+    } catch (error) {
+      console.error("Não foi possível mostrar a notificação:", error);
+    }
   }
 
   async function loadOrders(showNotification = false) {
