@@ -7,9 +7,9 @@ type OrderItem = { productId: string; quantity: number; color?: string; size?: s
 const ORDER_KEY = "adson-fashion-cart";
 
 function readOrder(): OrderItem[] {
-  try { return JSON.parse(localStorage.getItem(ORDER_KEY) ?? "[]") as OrderItem[]; } catch { return []; }
+  try { return JSON.parse(sessionStorage.getItem(ORDER_KEY) ?? "[]") as OrderItem[]; } catch { return []; }
 }
-function writeOrder(items: OrderItem[]) { localStorage.setItem(ORDER_KEY, JSON.stringify(items)); }
+function writeOrder(items: OrderItem[]) { sessionStorage.setItem(ORDER_KEY, JSON.stringify(items)); }
 
 export const Route = createFileRoute("/produtos")({ component: ProductsPage });
 
