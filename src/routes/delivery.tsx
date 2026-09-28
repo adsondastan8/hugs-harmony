@@ -43,6 +43,7 @@ function DeliveryPage() {
   const [mode,setMode]=useState<"login"|"signup">("login");
   const [activeOrder,setActiveOrder]=useState<string|null>(null);
   const [notificationsEnabled,setNotificationsEnabled]=useState(false);
+  const [newOrderAlert,setNewOrderAlert]=useState<DeliveryOrder|null>(null);
   const knownOrderIds=useRef<Set<string>>(new Set());
   const firstOrdersLoad=useRef(true);
 
@@ -115,9 +116,14 @@ function DeliveryPage() {
       const next = await listDeliveryOrders();
       const nextIds = new Set(next.map(order => order.id));
       if (!firstOrdersLoad.current && showNotification) {
-        next
-          .filter(order => order.status === "pending" && !knownOrderIds.current.has(order.id))
-          .forEach(notifyNewOrder);
+        const newOrders = next.filter(
+          order => order.status === "pending" && !knownOrderIds.current.has(order.id)
+        );
+        if (newOrders.length > 0) {
+          setNewOrderAlert(newOrders[0]);
+          window.setTimeout(() => setNewOrderAlert(null), 12000);
+        }
+        newOrders.forEach(notifyNewOrder);
       }
       knownOrderIds.current = nextIds;
       firstOrdersLoad.current = false;
@@ -185,6 +191,20 @@ function DeliveryPage() {
   return (
     <main className="min-h-screen bg-[#f5f1e8] px-4 py-6 text-[#171512] sm:py-10">
       <div className="mx-auto w-full max-w-4xl">
+        {newOrderAlert && (
+          <div className="fixed inset-x-3 top-4 z-50 mx-auto max-w-xl rounded-2xl border border-[#b8905a] bg-[#171512] p-4 text-white shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#b8905a] text-xl">🔔</div>
+              <button type="button" className="min-w-0 flex-1 text-left" onClick={() => { setActiveOrder(newOrderAlert.id); setNewOrderAlert(null); }}>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#d7b77a]">Nova encomenda</p>
+                <p className="mt-1 font-black">{newOrderAlert.customer_name}</p>
+                <p className="mt-1 text-sm text-white/70">{money(Number(newOrderAlert.total))} MT · {newOrderAlert.delivery_address}</p>
+              </button>
+              <button type="button" aria-label="Fechar" onClick={() => setNewOrderAlert(null)} className="rounded-lg px-2 py-1 text-white/60 hover:bg-white/10">✕</button>
+            </div>
+          </div>
+        )}
+
         <header className="mb-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#b8905a]">Adson Fashion</p>
