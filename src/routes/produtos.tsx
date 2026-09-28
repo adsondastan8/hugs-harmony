@@ -191,8 +191,13 @@ function ProductsPage() {
               </div>}
 
               {(selectedProduct.sizes?.length ?? 0) > 0 && <div className="mt-4">
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#776e62]">Escolha o tamanho</label>
-                <select value={selectedOrderItem?.size ?? ""} onChange={(e) => updateVariant(selectedProduct.id, "size", e.target.value)} className="w-full rounded-lg border border-[#e5dccd] bg-white px-3 py-3 text-sm"><option value="">Selecione o tamanho</option>{selectedProduct.sizes.map((size) => <option key={size}>{size}</option>)}</select>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-[#776e62]">
+                  {selectedProduct.category === "Calçado" ? "Escolha o número" : "Escolha o tamanho"}
+                </label>
+                <select value={selectedOrderItem?.size ?? ""} onChange={(e) => updateVariant(selectedProduct.id, "size", e.target.value)} className="w-full rounded-lg border border-[#e5dccd] bg-white px-3 py-3 text-sm">
+                  <option value="">{selectedProduct.category === "Calçado" ? "Selecione o número" : "Selecione o tamanho"}</option>
+                  {selectedProduct.sizes.map((size) => <option key={size}>{size}</option>)}
+                </select>
               </div>}
 
               <button type="button" disabled={!canAddSelected} onClick={() => selectProduct(selectedProduct)} className="mt-5 w-full rounded-xl bg-[#17130d] px-4 py-3.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-[#9a8f80]">
