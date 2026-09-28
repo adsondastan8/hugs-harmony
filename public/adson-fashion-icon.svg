@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1a8"/><stop offset=".35" stop-color="#d89b20"/><stop offset=".7" stop-color="#ffd75a"/><stop offset="1" stop-color="#a86d0b"/></linearGradient></defs>
+<rect width="512" height="512" rx="86" fill="#050505"/><rect x="18" y="18" width="476" height="476" rx="70" fill="none" stroke="url(#g)" stroke-width="9"/>
+<path d="M190 215l-42 76h31l17-30 17 30h31l-42-76z" fill="url(#g)"/><path d="M238 196h102l-25 27h-45v74h-33v-101z" fill="url(#g)"/>
+<path d="M158 304c70-65 160-78 233-46-57-8-118 6-174 49-18 14-39 16-59 5z" fill="url(#g)"/>
+<path d="M250 142l12-24 12 24 26-5-17 22 17 19-26-5-12 25-12-25-26 5 17-19-17-22z" fill="url(#g)"/>
+<path d="M120 245c-2-19 23-27 29-8 5-19 30-11 28 8l-28 25z" fill="none" stroke="url(#g)" stroke-width="7"/>
+<path d="M374 265h16l8 45h-40l-6-31h22l-3-14zm-21 45h-10l5 22h50" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="354" cy="344" r="7" fill="url(#g)"/><circle cx="392" cy="344" r="7" fill="url(#g)"/>
+<text x="256" y="392" text-anchor="middle" font-family="Georgia,serif" font-size="62" font-weight="700" letter-spacing="4" fill="url(#g)">ADSON</text><path d="M78 413h105M329 413h105" stroke="url(#g)" stroke-width="4"/><text x="256" y="444" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="8" fill="url(#g)">FASHION</text><text x="256" y="470" text-anchor="middle" font-family="cursive" font-size="13" fill="#f2c75c">Estilo em cada detalhe</text>
+</svg>
