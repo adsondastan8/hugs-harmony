@@ -6,7 +6,7 @@ import { createCheckoutOrder } from "../lib/supabase-orders";
 type CartItem = { productId: string; quantity: number; color?: string; size?: string };
 type DeliveryZone = "cidade" | "bairro";
 
-// Lovable preview sync marker: 2026-09-28
+// Delivery WhatsApp routing: selected online delivery receives the order directly
 const CART_KEY = "adson-fashion-cart";
 const STORE_WHATSAPP_NUMBER = "258853131247";
 const CITY_DELIVERY_FEE = 0;
