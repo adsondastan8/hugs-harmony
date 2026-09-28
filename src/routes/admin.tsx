@@ -9,6 +9,15 @@ import {
   type Product,
 } from "../lib/supabase-data";
 import { getCurrentUser, signOut } from "../lib/supabase-auth";
+import {
+  buildOrderWhatsAppUrl,
+  listOrderItems,
+  listOrders,
+  updateOrderStatus,
+  type Order,
+  type OrderItem,
+  type OrderStatus,
+} from "../lib/supabase-orders";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
@@ -16,7 +25,7 @@ export const Route = createFileRoute("/admin")({
 
 const cards = [
   ["📦", "Produtos", "Cadastrar, editar e gerir o estoque.", "produtos"],
-  ["🛒", "Pedidos", "Ver e confirmar pedidos dos clientes.", null],
+  ["🛒", "Pedidos", "Ver, confirmar e acompanhar os pedidos dos clientes.", "pedidos"],
   ["👥", "Clientes", "Consultar os clientes registados.", null],
   ["📊", "Estatísticas", "Acompanhar o movimento da loja.", null],
 ] as const;
@@ -25,7 +34,7 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const [checkingSession, setCheckingSession] = useState(true);
   const [email, setEmail] = useState("");
-  const [module, setModule] = useState<"dashboard" | "produtos">("dashboard");
+  const [module, setModule] = useState<"dashboard" | "produtos" | "pedidos">("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [productSaving, setProductSaving] = useState(false);
@@ -36,6 +45,10 @@ function AdminDashboard() {
   const [productPrice, setProductPrice] = useState("");
   const [productStock, setProductStock] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -60,6 +73,24 @@ function AdminDashboard() {
       active = false;
     };
   }, [navigate]);
+
+  useEffect(() => {
+    if (module !== "pedidos") return;
+    let active = true;
+    setOrderError("");
+    setOrderLoading(true);
+    void listOrders()
+      .then((data) => {
+        if (active) setOrders(data);
+      })
+      .catch((e) => {
+        if (active) setOrderError(e instanceof Error ? e.message : "Não foi possível carregar os pedidos.");
+      })
+      .finally(() => {
+        if (active) setOrderLoading(false);
+      });
+    return () => { active = false; };
+  }, [module]);
 
   useEffect(() => {
     if (module !== "produtos") return;
@@ -206,6 +237,42 @@ function AdminDashboard() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-900">
         <p className="text-sm font-semibold text-slate-500">A verificar a sua sessão...</p>
+      </main>
+    );
+  }
+
+  if (module === "pedidos") {
+    const statusLabel: Record<OrderStatus, string> = {
+      pending: "Pendente", confirmed: "Confirmado", sent: "Enviado", delivered: "Entregue", cancelled: "Cancelado",
+    };
+    const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = {
+      pending: "confirmed", confirmed: "sent", sent: "delivered",
+    };
+    return (
+      <main className="min-h-screen bg-slate-100 text-slate-900">
+        <header className="border-b border-slate-200 bg-slate-950 text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
+            <div><p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p><h1 className="mt-1 text-2xl font-black">Gestão de pedidos</h1></div>
+            <button type="button" onClick={() => setModule("dashboard")} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold">Voltar ao painel</button>
+          </div>
+        </header>
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+          {orderError && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{orderError}</div>}
+          {orderLoading ? <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">A carregar pedidos...</div> : orders.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500"><p className="text-4xl">🛒</p><p className="mt-3 font-bold">Ainda não há pedidos.</p><p className="mt-1 text-sm">Os pedidos aparecerão aqui quando o checkout do cliente estiver ligado.</p></div> : (
+            <div className="grid gap-5 lg:grid-cols-2">{orders.map((order) => (
+              <article key={order.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Pedido #{order.id.slice(0,8).toUpperCase()}</p><h2 className="mt-1 text-xl font-black">{order.customer_name}</h2><p className="text-sm text-slate-500">{order.customer_phone}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">{statusLabel[order.status]}</span></div>
+                <div className="mt-5 space-y-2 text-sm"><p><strong>Entrega:</strong> {order.delivery_address}</p><p><strong>Total:</strong> {Number(order.total).toLocaleString("pt-MZ")} MT</p>{order.notes && <p><strong>Observação:</strong> {order.notes}</p>}</div>
+                <button type="button" onClick={async () => { const items = await listOrderItems(order.id); setOrderItems((current) => ({...current, [order.id]: items})); }} className="mt-5 text-sm font-bold underline">Ver produtos do pedido</button>
+                {orderItems[order.id] && <div className="mt-3 rounded-xl bg-slate-50 p-4 text-sm">{orderItems[order.id].map((item) => <p key={item.id}>• {item.product_name} × {item.quantity} — {Number(item.subtotal).toLocaleString("pt-MZ")} MT</p>)}</div>}
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {nextStatus[order.status] && <button type="button" onClick={async () => { const updated = await updateOrderStatus(order.id, nextStatus[order.status]!); setOrders((items) => items.map((item) => item.id === order.id ? updated : item)); }} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Marcar como {statusLabel[nextStatus[order.status]!]}</button>}
+                  {order.customer_phone && <a href={buildOrderWhatsAppUrl(order, orderItems[order.id] ?? [])} target="_blank" rel="noreferrer" className="rounded-xl border border-green-200 px-4 py-2.5 text-sm font-bold text-green-700">WhatsApp</a>}
+                </div>
+              </article>
+            ))}</div>
+          )}
+        </section>
       </main>
     );
   }
@@ -469,7 +536,7 @@ function AdminDashboard() {
               {action ? (
                 <button
                   type="button"
-                  onClick={() => setModule("produtos")}
+                  onClick={() => setModule(action === "pedidos" ? "pedidos" : "produtos")}
                   className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
                 >
                   Abrir módulo
