@@ -7,6 +7,7 @@ export const Route = createFileRoute("/")({ component: StoreHome });
 function StoreHome() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => { void listPublicProducts().then(setProducts).catch(() => setProducts([])); }, []);
 
@@ -23,9 +24,59 @@ function StoreHome() {
             <a href="#experiencia" className="hover:text-[#17130d]">Como comprar</a>
             <a href="#entrega" className="hover:text-[#17130d]">Entrega</a>
           </nav>
-          <button type="button" onClick={() => navigate({ to: "/produtos" })} className="rounded-lg bg-[#17130d] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#2a2319]">Comprar agora</button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => navigate({ to: "/produtos" })} className="hidden rounded-lg bg-[#17130d] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#2a2319] sm:block">Comprar agora</button>
+            <button
+              type="button"
+              aria-label="Abrir menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#e5dccd] bg-[#fffdf9] text-[#17130d] shadow-sm"
+            >
+              <span className="text-xl leading-none">☰</span>
+            </button>
+          </div>
         </div>
       </header>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-50">
+          <button
+            type="button"
+            aria-label="Fechar menu"
+            onClick={() => setMenuOpen(false)}
+            className="absolute inset-0 bg-black/35"
+          />
+          <aside className="absolute right-0 top-0 h-full w-[min(86vw,360px)] bg-[#fffdf9] p-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#e5dccd] pb-4">
+              <div>
+                <p className="text-sm font-black">Adson Fashion</p>
+                <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-[#9a8f80]">Menu</p>
+              </div>
+              <button type="button" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e5dccd] text-lg">×</button>
+            </div>
+
+            <nav className="mt-5 space-y-2">
+              <button type="button" onClick={() => { setMenuOpen(false); navigate({ to: "/" }); }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-bold hover:bg-[#f6f1e8]">Início</button>
+              <button type="button" onClick={() => { setMenuOpen(false); navigate({ to: "/produtos" }); }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-bold hover:bg-[#f6f1e8]">Produtos</button>
+              <a href="#experiencia" onClick={() => setMenuOpen(false)} className="block w-full rounded-xl px-4 py-3 text-left text-sm font-bold hover:bg-[#f6f1e8]">Como comprar</a>
+              <a href="#entrega" onClick={() => setMenuOpen(false)} className="block w-full rounded-xl px-4 py-3 text-left text-sm font-bold hover:bg-[#f6f1e8]">Entrega</a>
+            </nav>
+
+            <div className="mt-8 border-t border-[#e5dccd] pt-5">
+              <p className="px-4 text-[9px] font-bold uppercase tracking-[0.18em] text-[#9a8f80]">Área reservada</p>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); navigate({ to: "/admin" }); }}
+                className="mt-2 flex w-full items-center justify-between rounded-xl border border-[#e5dccd] bg-[#f6f1e8] px-4 py-3 text-left text-sm font-black"
+              >
+                <span>ADM</span>
+                <span>→</span>
+              </button>
+            </div>
+          </aside>
+        </div>
+      )
 
       <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-7">
         <div className="relative overflow-hidden rounded-2xl bg-[#17130d] px-5 py-8 text-white sm:px-8 sm:py-12 lg:px-12 lg:py-14">
