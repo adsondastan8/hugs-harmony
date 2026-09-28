@@ -541,60 +541,80 @@ function AdminDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="border-b border-slate-200 bg-slate-950 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p>
-            <h1 className="mt-1 text-2xl font-black">Painel do ADM</h1>
-            {email && <p className="mt-1 text-xs text-slate-400">{email}</p>}
+    <main className="min-h-screen bg-[#F5F1E8] text-[#171512]">
+      <div className="min-h-screen lg:flex">
+        <aside className="w-full border-b border-[#E7DED0] bg-[#171512] text-white lg:min-h-screen lg:w-72 lg:border-b-0 lg:border-r lg:border-[#2d2a26]">
+          <div className="p-6 lg:sticky lg:top-0">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p>
+            <h1 className="mt-2 text-2xl font-black">Painel ADM</h1>
+            <p className="mt-1 truncate text-xs text-white/50">{email}</p>
+            <nav className="mt-8 grid gap-2">
+              <button type="button" onClick={() => setModule("dashboard")} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
+              <button type="button" onClick={() => setModule("produtos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
+              <button type="button" onClick={() => setModule("pedidos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
+              <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">👥 Clientes <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
+              <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">📈 Estatísticas <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
+            </nav>
+            <button type="button" onClick={handleLogout} className="mt-8 w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800"
-          >
-            Sair
-          </button>
-        </div>
-      </header>
+        </aside>
 
-      <section className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-        <div>
-          <p className="text-sm font-semibold text-slate-500">Bem-vindo ao painel</p>
-          <h2 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Gestão da loja</h2>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
-            Aqui será possível administrar produtos, pedidos e clientes da Adson Fashion.
-          </p>
-        </div>
+        <section className="flex-1">
+          <header className="border-b border-[#E7DED0] bg-[#FFFCF7]">
+            <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
+              <div>
+                <p className="text-sm font-semibold text-[#756F67]">Bem-vindo ao painel</p>
+                <h2 className="mt-1 text-3xl font-black tracking-tight">Gestão da loja</h2>
+              </div>
+              <a href="/" className="rounded-xl border border-[#D9CEBF] px-4 py-2.5 text-sm font-bold hover:bg-[#F5F1E8]">Ver loja</a>
+            </div>
+          </header>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map(([icon, title, description, action]) => (
-            <article key={title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="text-3xl">{icon}</div>
-              <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-              {action ? (
-                <button
-                  type="button"
-                  onClick={() => setModule(action === "pedidos" ? "pedidos" : "produtos")}
-                  className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
-                >
-                  Abrir módulo
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="mt-5 cursor-not-allowed rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500"
-                >
-                  Em breve
-                </button>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
+          <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Área</p>
+                <p className="mt-2 text-2xl font-black">Privada</p>
+                <p className="mt-1 text-sm text-[#756F67]">Acesso protegido</p>
+              </div>
+              <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Produtos</p>
+                <p className="mt-2 text-2xl font-black">Gestão</p>
+                <p className="mt-1 text-sm text-[#756F67]">Catálogo e estoque</p>
+              </div>
+              <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Encomendas</p>
+                <p className="mt-2 text-2xl font-black">Controle</p>
+                <p className="mt-1 text-sm text-[#756F67]">Acompanhe os pedidos</p>
+              </div>
+              <div className="rounded-2xl border border-[#E7DED0] bg-[#171512] p-5 text-white">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#B8905A]">Conta</p>
+                <p className="mt-2 truncate text-lg font-black">{email || "Administrador"}</p>
+                <p className="mt-1 text-sm text-white/60">Sessão ativa</p>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8905A]">Módulos</p>
+              <h3 className="mt-2 text-2xl font-black">O que quer administrar?</h3>
+              <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                {cards.map(([icon, title, description, action]) => (
+                  <article key={title} className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-sm">
+                    <div className="text-3xl">{icon}</div>
+                    <h4 className="mt-5 text-xl font-bold">{title}</h4>
+                    <p className="mt-2 text-sm leading-6 text-[#756F67]">{description}</p>
+                    {action ? (
+                      <button type="button" onClick={() => setModule(action === "pedidos" ? "pedidos" : "produtos")} className="mt-5 rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90">Abrir módulo</button>
+                    ) : (
+                      <span className="mt-5 inline-flex rounded-xl bg-[#EEE8DE] px-4 py-2.5 text-sm font-bold text-[#756F67]">Em breve</span>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
