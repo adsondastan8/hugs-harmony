@@ -36,17 +36,33 @@ export async function subscribeDeliveryPush(deliveryId: string) {
   let subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      throw new Error(`O Chrome ainda não autorizou notificações (estado: ${Notification.permission}).`);
+    }
+
+    const pushController = new AbortController();
+    const pushTimeoutId = window.setTimeout(() => pushController.abort(), 10000);
+
     try {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-      });
+      subscription = await Promise.race([
+        registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        }),
+        new Promise<PushSubscription>((_, reject) => {
+          pushController.signal.addEventListener("abort", () => {
+            reject(new Error("O Chrome demorou demasiado a criar a Push Subscription."));
+          });
+        }),
+      ]);
     } catch (error) {
       throw new Error(
         error instanceof Error
-          ? `O Chrome não conseguiu ativar o Push: ${error.message}`
-          : "O Chrome não conseguiu ativar o Push."
+          ? `O Chrome não conseguiu criar a Push Subscription: ${error.message}`
+          : "O Chrome não conseguiu criar a Push Subscription."
       );
+    } finally {
+      window.clearTimeout(pushTimeoutId);
     }
   }
 
