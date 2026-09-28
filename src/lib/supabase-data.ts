@@ -47,6 +47,23 @@ export async function listProducts() {
   return (await request("/products?select=*&order=created_at.desc")) as Product[];
 }
 
+export type DeliveryProfile = {
+  id: string;
+  name: string;
+  phone: string;
+  login_email?: string | null;
+  is_online: boolean;
+};
+
+export async function listDeliveryProfiles() {
+  const response = await fetch(
+    `${SUPABASE_URL.replace(/\\/$/, "")}/rest/v1/delivery_profiles?select=id,name,phone,is_online&order=name.asc`,
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" } },
+  );
+  if (!response.ok) throw new Error("Não foi possível carregar a disponibilidade dos deliveries.");
+  return (await response.json()) as DeliveryProfile[];
+}
+
 export async function listPublicProducts() {
   const query = "/products?select=id,name,category,price,stock,created_at,image_url,colors,sizes&order=created_at.desc";
   try {
