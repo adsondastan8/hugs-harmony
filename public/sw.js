@@ -1,4 +1,4 @@
-const CACHE_NAME = "adson-fashion-pwa-v3";
+const CACHE_NAME = "adson-fashion-pwa-v4";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/adson-fashion-icon.svg"];
 
 self.addEventListener("install", (event) => {
