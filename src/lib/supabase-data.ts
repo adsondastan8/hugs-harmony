@@ -39,6 +39,8 @@ export type Product = {
   created_by: string;
   created_at: string;
   image_url?: string | null;
+  colors: string[];
+  sizes: string[];
 };
 
 export async function listProducts() {
@@ -46,7 +48,7 @@ export async function listProducts() {
 }
 
 export async function listPublicProducts() {
-  const query = "/products?select=id,name,category,price,stock,created_at,image_url&order=created_at.desc";
+  const query = "/products?select=id,name,category,price,stock,created_at,image_url,colors,sizes&order=created_at.desc";
   try {
     return (await request(query, {}, false)) as Product[];
   } catch {
@@ -59,12 +61,12 @@ export async function listPublicProducts() {
   }
 }
 
-export async function createProduct(input: { name: string; category: string; price: number; stock: number; created_by: string }) {
+export async function createProduct(input: { name: string; category: string; price: number; stock: number; created_by: string; colors?: string[]; sizes?: string[] }) {
   const result = await request("/products", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(input) });
   return (result as Product[])[0];
 }
 
-export async function updateProduct(id: string, input: { name: string; category: string; price: number; stock: number; image_url?: string | null }) {
+export async function updateProduct(id: string, input: { name: string; category: string; price: number; stock: number; image_url?: string | null; colors?: string[]; sizes?: string[] }) {
   const result = await request(`/products?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify(input) });
   return (result as Product[])[0];
 }
