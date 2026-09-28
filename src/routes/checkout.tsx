@@ -8,7 +8,10 @@ type DeliveryZone = "cidade" | "bairro";
 const CART_KEY = "adson-fashion-cart";
 const STORE_WHATSAPP_NUMBER = "258853131247";
 const CITY_DELIVERY_FEE = 0;
-const NEIGHBORHOOD_DELIVERY_FEE = 70;
+const NEAR_DELIVERY_FEE = 50;
+const MID_DELIVERY_FEE = 80;
+const NEAR_NEIGHBORHOODS = ["Popular", "Muchenga", "N'zinje", "Estação", "Cerâmica", "Chiuaula / Luchiringo"];
+const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger", "Assumane", "Sambula", "Mitava", "Utumuile", "Ntoto", "Naluila"];
 
 function readCart(): CartItem[] {
   try { return JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
@@ -28,6 +31,8 @@ function CheckoutPage() {
   const [deliveryTime, setDeliveryTime] = useState("");
   const [notes, setNotes] = useState("");
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("cidade");
+
+  const neighborhoodFee = NEAR_NEIGHBORHOODS.includes(neighborhood) ? NEAR_DELIVERY_FEE : MID_NEIGHBORHOODS.includes(neighborhood) ? MID_DELIVERY_FEE : MID_DELIVERY_FEE;
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -41,7 +46,7 @@ function CheckoutPage() {
   }).filter(Boolean) as Array<{ product: Product; quantity: number }>;
 
   const subtotal = lines.reduce((sum, line) => sum + Number(line.product.price) * line.quantity, 0);
-  const deliveryFee = deliveryZone === "bairro" ? NEIGHBORHOOD_DELIVERY_FEE : CITY_DELIVERY_FEE;
+  const deliveryFee = deliveryZone === "bairro" ? neighborhoodFee : CITY_DELIVERY_FEE;
   const total = subtotal + deliveryFee;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -61,7 +66,7 @@ function CheckoutPage() {
       return;
     }
 
-    const zoneLabel = deliveryZone === "cidade" ? "Dentro da cidade (grátis)" : "Bairro (70 MT)";
+    const zoneLabel = deliveryZone === "cidade" ? "Dentro da cidade (grátis)" : `Bairro ${neighborhood} (${deliveryFee} MT)`;
     const message = [
       "Olá, Adson Fashion! Quero fazer uma encomenda.",
       "",
@@ -154,6 +159,7 @@ function CheckoutPage() {
                   <label className="text-sm font-bold">Telefone<input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+258 84 000 0000" className={fieldClass} /></label>
                   <label className="text-sm font-bold">Hora desejada<input required type="time" value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className={fieldClass} /></label>
                   <label className="text-sm font-bold">Bairro<select required value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className={fieldClass}><option value="">Selecione o bairro</option><option>Sanjala</option><option>N'zinje</option><option>Muchenga</option><option>Popular</option><option>Namacula</option><option>Chiulugo</option><option>Chiuaula / Luchiringo</option><option>Estação</option><option>Cerâmica</option><option>Massenger</option><option>Assumane</option><option>Sambula</option><option>23 de Setembro</option><option>Mitava</option><option>Utumuile</option><option>Ntoto</option><option>Naluila</option></select></label>
+                  <p className="mt-2 text-xs font-semibold text-[#8b6b2f]">Taxa de delivery: {neighborhood ? `${neighborhoodFee} MT` : "selecione o bairro"}</p>
                   <label className="text-sm font-bold">Endereço / ponto de referência<input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua, casa, ponto de referência..." className={fieldClass} /></label>
                   <div className="sm:col-span-2">
                     <p className="text-sm font-bold">Zona de entrega</p>
@@ -162,7 +168,7 @@ function CheckoutPage() {
                         <span className="block text-sm font-black">Dentro da cidade</span><span className={`mt-1 block text-xs ${deliveryZone === "cidade" ? "text-white/70" : "text-[#776e62]"}`}>Entrega grátis</span>
                       </button>
                       <button type="button" onClick={() => setDeliveryZone("bairro")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "bairro" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
-                        <span className="block text-sm font-black">Bairro</span><span className={`mt-1 block text-xs ${deliveryZone === "bairro" ? "text-white/70" : "text-[#776e62]"}`}>Taxa de 70 MT</span>
+                        <span className="block text-sm font-black">Bairro</span><span className={`mt-1 block text-xs ${deliveryZone === "bairro" ? "text-white/70" : "text-[#776e62]"}`}>A taxa é definida pelo bairro</span>
                       </button>
                     </div>
                   </div>
