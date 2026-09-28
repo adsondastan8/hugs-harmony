@@ -629,14 +629,19 @@ function AdminDashboard() {
                   </label>
 
                   <label className="grid gap-2 text-sm font-semibold">
-                    Tamanhos disponíveis
+                    {productCategory === "Calçado" ? "Números disponíveis" : "Tamanhos disponíveis"}
                     <input
                       value={productSizes}
                       onChange={(e) => setProductSizes(e.target.value)}
-                      placeholder="Ex.: S, M, L, XL, XXL"
+                      placeholder={productCategory === "Calçado" ? "Ex.: 36, 37, 38, 39, 40, 41, 42" : "Ex.: S, M, L, XL, XXL"}
+                      inputMode={productCategory === "Calçado" ? "numeric" : "text"}
                       className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
                     />
-                    <span className="text-xs font-normal text-[#756F67]">Separe os tamanhos por vírgulas.</span>
+                    <span className="text-xs font-normal text-[#756F67]">
+                      {productCategory === "Calçado"
+                        ? "Indique os números disponíveis, separados por vírgulas."
+                        : "Separe os tamanhos por vírgulas."}
+                    </span>
                   </label>
 
                   <label className="grid gap-2 text-sm font-semibold md:col-span-2">
