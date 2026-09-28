@@ -54,6 +54,8 @@ function AdminDashboard() {
   const [productCategory, setProductCategory] = useState("Roupa");
   const [productPrice, setProductPrice] = useState("");
   const [productStock, setProductStock] = useState("");
+  const [productColors, setProductColors] = useState("");
+  const [productSizes, setProductSizes] = useState("");
   const [productImage, setProductImage] = useState<File | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
@@ -184,6 +186,8 @@ function AdminDashboard() {
     setProductCategory("Roupa");
     setProductPrice("");
     setProductStock("");
+    setProductColors("");
+    setProductSizes("");
     setProductImage(null);
   }
 
@@ -193,6 +197,8 @@ function AdminDashboard() {
     setProductCategory(product.category);
     setProductPrice(String(product.price));
     setProductStock(String(product.stock));
+    setProductColors((product.colors ?? []).join(", "));
+    setProductSizes((product.sizes ?? []).join(", "));
     setProductImage(null);
     setProductError("");
     document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -204,6 +210,8 @@ function AdminDashboard() {
 
     const price = Number(productPrice.replace(",", "."));
     const stock = Number(productStock);
+    const colors = productColors.split(",").map((value) => value.trim()).filter(Boolean);
+    const sizes = productSizes.split(",").map((value) => value.trim()).filter(Boolean);
 
     if (
       !productName.trim() ||
@@ -239,6 +247,8 @@ function AdminDashboard() {
           price,
           stock,
           image_url: imageUrl,
+          colors,
+          sizes,
         });
 
         setProducts((items) =>
@@ -251,6 +261,8 @@ function AdminDashboard() {
           price,
           stock,
           created_by: user.id,
+          colors,
+          sizes,
         });
 
         let createdProduct = created;
@@ -500,6 +512,18 @@ function AdminDashboard() {
                     placeholder="Quantidade disponível"
                     className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
                   />
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold">
+                  Cores disponíveis
+                  <input value={productColors} onChange={(e) => setProductColors(e.target.value)} placeholder="Ex.: Preto, Branco, Azul, Vermelho" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" />
+                  <span className="text-xs font-normal text-slate-500">Separe as cores por vírgulas.</span>
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold">
+                  Tamanhos disponíveis
+                  <input value={productSizes} onChange={(e) => setProductSizes(e.target.value)} placeholder="Ex.: S, M, L, XL, XXL" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" />
+                  <span className="text-xs font-normal text-slate-500">Separe os tamanhos por vírgulas.</span>
                 </label>
 
                 <label className="grid gap-2 text-sm font-semibold md:col-span-2">
