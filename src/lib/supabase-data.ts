@@ -44,6 +44,7 @@ export type Product = {
   stock: number;
   created_by: string;
   created_at: string;
+  image_url?: string | null;
 };
 
 export async function listProducts() {
@@ -63,6 +64,47 @@ export async function createProduct(input: {
     body: JSON.stringify(input),
   });
   return (result as Product[])[0];
+}
+
+export async function updateProduct(id: string, input: {
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  image_url?: string | null;
+}) {
+  const result = await request(`/products?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(input),
+  });
+  return (result as Product[])[0];
+}
+
+export async function uploadProductImage(productId: string, file: File) {
+  const { url, key } = getConfig();
+  const session = getStoredSession();
+  if (!session) throw new Error("Sessão do ADM não encontrada. Entre novamente.");
+  if (!file.type.startsWith("image/")) throw new Error("Escolha uma imagem válida.");
+  if (file.size > 6 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 6 MB.");
+
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
+  const path = `${productId}/${Date.now()}-${safeName || "imagem"}`;
+  const response = await fetch(`${url}/storage/v1/object/product-images/${path}`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": file.type,
+      "x-upsert": "false",
+    },
+    body: file,
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || data?.error || "Não foi possível enviar a imagem.");
+  }
+  return `${url}/storage/v1/object/public/product-images/${path}`;
 }
 
 export async function deleteProduct(id: string) {
