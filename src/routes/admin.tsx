@@ -45,7 +45,6 @@ function AdminDashboard() {
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [module, setModule] = useState<"dashboard" | "produtos" | "pedidos" | "clientes">("dashboard");
-  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [productSaving, setProductSaving] = useState(false);
@@ -63,6 +62,7 @@ function AdminDashboard() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [customerLoading, setCustomerLoading] = useState(false);
   const [customerError, setCustomerError] = useState("");
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -291,6 +291,10 @@ function AdminDashboard() {
   async function handleLogout() {
     await signOut();
     navigate({ to: "/" });
+  }
+
+  function requestLogout() {
+    setLogoutConfirmOpen(true);
   }
 
   if (checkingSession) {
@@ -609,59 +613,36 @@ function AdminDashboard() {
   return (
     <main className="min-h-screen bg-[#F5F1E8] text-[#171512]">
       <div className="min-h-screen">
-        <header className="border-b border-[#E7DED0] bg-[#FFFCF7]">
+        <header className="border-b border-[#E7DED0] bg-[#FFFCF7] pr-[250px]">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p>
               <h1 className="mt-1 text-2xl font-black">Painel ADM</h1>
               <p className="mt-1 truncate text-xs text-[#756F67]">{email}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <a href="/" className="hidden rounded-xl border border-[#D9CEBF] px-4 py-2.5 text-sm font-bold hover:bg-[#F5F1E8] sm:block">Ver loja</a>
-              <button type="button" aria-label="Abrir menu do ADM" aria-expanded={adminMenuOpen} onClick={() => setAdminMenuOpen(true)} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#171512] text-xl text-white">☰</button>
-            </div>
+            <a href="/" className="rounded-xl border border-[#D9CEBF] px-4 py-2.5 text-sm font-bold hover:bg-[#F5F1E8]">Ver loja</a>
           </div>
         </header>
 
-        {adminMenuOpen && (
-          <div className="fixed inset-0 z-50">
-            <button type="button" aria-label="Fechar menu" onClick={() => setAdminMenuOpen(false)} className="absolute inset-0 bg-black/40" />
-            <aside className="absolute right-0 top-0 h-full w-[min(88vw,380px)] overflow-y-auto bg-[#171512] p-5 text-white shadow-2xl">
-              <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#B8905A]">Adson Fashion</p>
-                  <p className="mt-1 text-lg font-black">Menu do ADM</p>
-                </div>
-                <button type="button" aria-label="Fechar menu" onClick={() => setAdminMenuOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-xl">×</button>
-              </div>
-              <nav className="mt-5 grid gap-2">
-                <button type="button" onClick={() => { setModule("dashboard"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
-                <button type="button" onClick={() => { setModule("produtos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
-                <button type="button" onClick={() => { setModule("pedidos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
-                <button type="button" onClick={() => { setModule("clientes"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">👥 Clientes</button>
-                <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">📈 Estatísticas <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
-              </nav>
-              <div className="mt-8 border-t border-white/10 pt-5">
-                <button type="button" onClick={() => { setAdminMenuOpen(false); void handleLogout(); }} className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
-              </div>
-            </aside>
-          </div>
-        )}
-
-        <section className="flex-1">
-          <div className="p-6 lg:sticky lg:top-0">
+        <aside className="fixed right-0 top-0 z-40 flex h-screen w-[250px] flex-col border-l border-[#2d2a26] bg-[#171512] p-5 text-white shadow-2xl">
+          <div className="border-b border-white/10 pb-5">
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p>
-            <h1 className="mt-2 text-2xl font-black">Painel ADM</h1>
-            <p className="mt-1 truncate text-xs text-white/50">{email}</p>
-            <nav className="mt-8 grid gap-2">
-              <button type="button" onClick={() => setModule("dashboard")} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
-              <button type="button" onClick={() => setModule("produtos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
-              <button type="button" onClick={() => setModule("pedidos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
-              <button type="button" onClick={() => setModule("clientes")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">👥 Clientes</button>
-              <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">📈 Estatísticas <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
-            </nav>
-            <button type="button" onClick={handleLogout} className="mt-8 w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
+            <h2 className="mt-2 text-xl font-black">Menu ADM</h2>
+            <p className="mt-1 truncate text-xs text-white/45">{email}</p>
           </div>
+          <nav className="mt-6 grid gap-2">
+            <button type="button" onClick={() => setModule("dashboard")} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
+            <button type="button" onClick={() => setModule("produtos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
+            <button type="button" onClick={() => setModule("pedidos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
+            <button type="button" onClick={() => setModule("clientes")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">👥 Clientes</button>
+            <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/35">📈 Estatísticas <span className="ml-auto text-[9px] uppercase">Em breve</span></button>
+          </nav>
+          <div className="mt-auto border-t border-white/10 pt-5">
+            <button type="button" onClick={requestLogout} className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
+          </div>
+        </aside>
+
+        <section className="pr-[250px]">
           <div className="mx-auto max-w-7xl px-5 pt-8 sm:px-8">
             <div>
               <p className="text-sm font-semibold text-[#756F67]">Bem-vindo ao painel</p>
@@ -714,7 +695,22 @@ function AdminDashboard() {
               </div>
             </div>
           </div>
+
         </section>
+
+        {logoutConfirmOpen && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 px-5">
+            <div className="w-full max-w-sm rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-2xl">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8905A]">Sair do ADM</p>
+              <h2 className="mt-2 text-xl font-black text-[#171512]">Tem certeza que quer sair?</h2>
+              <p className="mt-2 text-sm leading-5 text-[#756F67]">A sessão do administrador será encerrada neste dispositivo.</p>
+              <div className="mt-6 flex gap-3">
+                <button type="button" onClick={() => setLogoutConfirmOpen(false)} className="flex-1 rounded-xl border border-[#D9CEBF] px-4 py-3 text-sm font-bold text-[#171512]">Não</button>
+                <button type="button" onClick={() => void handleLogout()} className="flex-1 rounded-xl bg-[#171512] px-4 py-3 text-sm font-bold text-white">Sim, sair</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
