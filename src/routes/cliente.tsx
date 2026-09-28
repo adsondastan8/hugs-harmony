@@ -110,7 +110,24 @@ function CustomerPage() {
             <button disabled={loading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{loading ? "A guardar..." : loggedIn ? "Guardar dados" : mode === "signup" ? "Criar conta" : "Entrar"}</button>
           </form>
 
-          {loggedIn && <button type="button" onClick={() => void logout()} className="mt-4 w-full rounded-xl border border-slate-300 px-5 py-3 font-bold">Sair da conta</button>}
+          {loggedIn && (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/" })}
+                className="mt-4 w-full rounded-xl bg-emerald-600 px-5 py-3.5 font-bold text-white"
+              >
+                Continuar a comprar
+              </button>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="mt-3 w-full rounded-xl border border-slate-300 px-5 py-3 font-bold"
+              >
+                Sair da conta
+              </button>
+            </>
+          )}
         </section>
       </div>
     </main>
