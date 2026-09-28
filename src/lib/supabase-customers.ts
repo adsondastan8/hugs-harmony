@@ -56,3 +56,9 @@ export async function saveCustomerProfile(input: { name: string; phone: string; 
   });
   return (data as Customer[])[0];
 }
+
+
+export async function listCustomers() {
+  const data = await request("/rpc/admin_list_customers", { method: "POST", body: JSON.stringify({}) });
+  return data as Customer[];
+}
