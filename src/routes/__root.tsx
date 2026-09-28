@@ -126,7 +126,7 @@ function RootComponent() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        void navigator.serviceWorker.register("/sw.js?v=2");
+        void navigator.serviceWorker.register("/sw.js?v=3");
       });
     }
   }, []);
