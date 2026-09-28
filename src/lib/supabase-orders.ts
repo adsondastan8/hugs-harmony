@@ -21,7 +21,7 @@ export type CheckoutOrderInput = {
   deliveryAddress: string;
   total: number;
   notes?: string;
-  items: Array<{ productId: string; quantity: number }>;
+  items: Array<{ productId: string; quantity: number; color?: string; size?: string }>;
 };
 
 export async function createCheckoutOrder(input: CheckoutOrderInput) {
@@ -43,6 +43,8 @@ export async function createCheckoutOrder(input: CheckoutOrderInput) {
         p_items: input.items.map((item) => ({
           product_id: item.productId,
           quantity: item.quantity,
+          selected_color: item.color ?? null,
+          selected_size: item.size ?? null,
         })),
       }),
     },
@@ -80,6 +82,8 @@ export type OrderItem = {
   unit_price: number;
   quantity: number;
   subtotal: number;
+  selected_color: string | null;
+  selected_size: string | null;
 };
 
 function getConfig() {
@@ -145,7 +149,7 @@ export function buildOrderWhatsAppUrl(order: Order, items: OrderItem[]) {
     "Olá! Aqui é da Adson Fashion.",
     "",
     `Pedido: #${order.id.slice(0, 8).toUpperCase()}`,
-    ...items.map((item) => `• ${item.product_name} x${item.quantity} — ${Number(item.subtotal).toLocaleString("pt-MZ")} MT`),
+    ...items.map((item) => `• ${item.product_name} x${item.quantity}${item.selected_color ? ` · Cor: ${item.selected_color}` : ""}${item.selected_size ? ` · Tamanho: ${item.selected_size}` : ""} — ${Number(item.subtotal).toLocaleString("pt-MZ")} MT`),
     "",
     `Total: ${Number(order.total).toLocaleString("pt-MZ")} MT`,
     `Entrega: ${order.delivery_address}`,
