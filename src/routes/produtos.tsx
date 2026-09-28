@@ -71,11 +71,32 @@ function ProductsPage() {
     ((selectedProduct.colors?.length ?? 0) === 0 || !!selectedOrderItem?.color) &&
     ((selectedProduct.sizes?.length ?? 0) === 0 || !!selectedOrderItem?.size);
 
-  const colorMap: Record<string, string> = {
-    preto: "#17130d", branco: "#ffffff", azul: "#2563eb", vermelho: "#dc2626",
-    verde: "#16a34a", amarelo: "#eab308", rosa: "#ec4899", roxo: "#9333ea",
-    laranja: "#f97316", castanho: "#92400e", marrom: "#92400e", cinzento: "#6b7280", cinza: "#6b7280"
-  };
+  function getColorStyle(value: string): React.CSSProperties {
+    const color = value.trim().toLowerCase();
+    const aliases: Record<string, string> = {
+      preto: "#17130d", black: "#17130d",
+      branco: "#ffffff", white: "#ffffff",
+      azul: "#2563eb", blue: "#2563eb",
+      vermelho: "#dc2626", red: "#dc2626",
+      verde: "#16a34a", green: "#16a34a",
+      amarelo: "#eab308", yellow: "#eab308",
+      rosa: "#ec4899", pink: "#ec4899",
+      roxo: "#9333ea", purple: "#9333ea",
+      laranja: "#f97316", orange: "#f97316",
+      castanho: "#92400e", marrom: "#92400e", brown: "#92400e",
+      cinzento: "#6b7280", cinza: "#6b7280", grey: "#6b7280", gray: "#6b7280",
+      vinho: "#722f37", bordô: "#800020", bordeaux: "#800020",
+      bege: "#d6c3a5", dourado: "#d4af37", prata: "#c0c0c0"
+    };
+    const direct = aliases[color];
+    if (direct) return { backgroundColor: direct };
+    if (color.startsWith("#") || color.startsWith("rgb(") || color.startsWith("hsl(")) return { backgroundColor: value };
+    const parts = color.split(/\\s*(?:,|\\+|\\/| e )\\s*/).map((part) => aliases[part] ?? part).filter(Boolean);
+    if (parts.length > 1 && parts.every((part) => /^(#|rgb|hsl|[a-z])/i.test(part))) {
+      return { background: `linear-gradient(135deg, ${parts.join(", ")} )` };
+    }
+    return { backgroundColor: "#d8cdbb" };
+  }
 
   return (
     <main className="min-h-screen bg-[#faf7f1] pb-24 text-[#17130d]">
@@ -144,8 +165,8 @@ function ProductsPage() {
                 <div className="flex flex-wrap gap-3">
                   {selectedProduct.colors.map((color) => {
                     const active = selectedOrderItem?.color === color;
-                    const bg = colorMap[color.toLowerCase()] ?? color;
-                    return <button key={color} type="button" title={color} aria-label={color} onClick={() => updateVariant(selectedProduct.id, "color", color)} className={`h-10 w-10 rounded-full border-2 ${active ? "border-[#a88745] ring-2 ring-[#a88745]/30" : "border-[#d8cdbb]"}`} style={{ backgroundColor: bg }} />;
+                    const colorStyle = getColorStyle(color);
+                    return <button key={color} type="button" title={color} aria-label={color} onClick={() => updateVariant(selectedProduct.id, "color", color)} className={`h-10 w-10 rounded-full border-2 ${active ? "border-[#a88745] ring-2 ring-[#a88745]/30" : "border-[#d8cdbb]"}`} style={colorStyle} />;
                   })}
                 </div>
                 <p className="mt-2 text-xs text-[#776e62]">{selectedOrderItem?.color ?? "Selecione uma cor"}</p>
