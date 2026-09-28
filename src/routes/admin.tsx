@@ -24,6 +24,8 @@ export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
 });
 
+const ADMIN_EMAIL = "adsondastan2@gmail.com";
+
 const cards = [
   ["📦", "Produtos", "Cadastrar, editar e gerir o estoque.", "produtos"],
   ["🛒", "Pedidos", "Ver, confirmar e acompanhar os pedidos dos clientes.", "pedidos"],
@@ -90,6 +92,9 @@ function AdminDashboard() {
     setAuthError("");
     setAuthLoading(true);
     try {
+      if (authEmail.trim().toLowerCase() !== ADMIN_EMAIL) {
+        throw new Error(`Este ADM aceita apenas o e-mail ${ADMIN_EMAIL}.`);
+      }
       if (authMode === "signup") {
         if (!authName.trim()) throw new Error("Informe o seu nome.");
         const result = await signUp(authEmail.trim(), authPassword, authName.trim());
