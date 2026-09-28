@@ -25,12 +25,25 @@ export async function subscribeDeliveryPush(deliveryId: string) {
   const session = getDeliverySession();
   if (!session?.access_token) throw new Error("Sessão de delivery não encontrada.");
 
-  const registration =
-    (await navigator.serviceWorker.getRegistration("/")) ??
-    (await navigator.serviceWorker.ready);
+  const registrationController = new AbortController();
+  const registrationTimeoutId = window.setTimeout(() => registrationController.abort(), 8000);
+
+  let registration: ServiceWorkerRegistration;
+  try {
+    registration = await Promise.race([
+      navigator.serviceWorker.getRegistration("/").then((current) => current ?? navigator.serviceWorker.ready),
+      new Promise<ServiceWorkerRegistration>((_, reject) => {
+        registrationController.signal.addEventListener("abort", () => {
+          reject(new Error("O Service Worker não respondeu. Recarregue a página e tente novamente."));
+        });
+      }),
+    ]);
+  } finally {
+    window.clearTimeout(registrationTimeoutId);
+  }
 
   if (!registration.active) {
-    throw new Error("O Service Worker ainda está a iniciar. Feche e abra novamente a página e tente outra vez.");
+    throw new Error("O Service Worker não está ativo neste momento. Recarregue a página e tente novamente.");
   }
 
   let subscription = await registration.pushManager.getSubscription();
