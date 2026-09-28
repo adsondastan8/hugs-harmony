@@ -44,6 +44,7 @@ function DeliveryPage() {
   const [mode,setMode]=useState<"login"|"signup">("login");
   const [activeOrder,setActiveOrder]=useState<string|null>(null);
   const [notificationsEnabled,setNotificationsEnabled]=useState(false);
+  const [chromeNotificationsEnabled,setChromeNotificationsEnabled]=useState(false);
   const [newOrderAlert,setNewOrderAlert]=useState<DeliveryOrder|null>(null);
   const knownOrderIds=useRef<Set<string>>(new Set());
   const firstOrdersLoad=useRef(true);
@@ -71,6 +72,8 @@ function DeliveryPage() {
       const permission = Notification.permission === "granted"
         ? "granted"
         : await Notification.requestPermission();
+
+      setChromeNotificationsEnabled(permission === "granted");
 
       if (permission !== "granted") {
         setNotificationsEnabled(false);
@@ -117,6 +120,7 @@ function DeliveryPage() {
     void (async () => {
       if (typeof window !== "undefined" && "Notification" in window) {
         const granted = Notification.permission === "granted";
+        setChromeNotificationsEnabled(granted);
         setNotificationsEnabled(granted && await hasDeliveryPushSubscription());
       }
     })();
@@ -230,8 +234,15 @@ function DeliveryPage() {
                   <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b8905a]">Trabalho</p><h2 className="mt-1 text-2xl font-black">As minhas encomendas</h2><p className="mt-1 text-sm text-[#756f67]">Aqui aparecem apenas as encomendas atribuídas a este delivery.</p></div>
                   <div className="flex flex-wrap justify-end gap-2">
                     <button type="button" onClick={()=>void enableNotifications()} className={`rounded-xl border px-3 py-2 text-xs font-bold ${notificationsEnabled ? "border-green-200 bg-green-50 text-green-700" : "border-[#d9cebf] bg-white"}`}>
-                      {notificationsEnabled ? "🔔 Notificações ativas" : "🔔 Ativar notificações"}
+                      {notificationsEnabled ? "🔔 Push ativo" : chromeNotificationsEnabled ? "🔔 Chrome ativo · configurar Push" : "🔔 Ativar notificações"}
                     </button>
+                    <p className="mt-2 text-[11px] leading-4 text-[#7b7368]">
+                      {notificationsEnabled
+                        ? "Este dispositivo está registado para receber novas encomendas."
+                        : chromeNotificationsEnabled
+                          ? "O Chrome permite notificações, mas este dispositivo ainda precisa ser registado para receber encomendas em segundo plano."
+                          : "As notificações do Chrome ainda não foram autorizadas neste dispositivo."}
+                    </p>
                     <button type="button" onClick={()=>void loadOrders(false)} className="rounded-xl border border-[#d9cebf] px-3 py-2 text-xs font-bold">Atualizar</button>
                   </div>
                 </div>
