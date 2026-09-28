@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { subscribeDeliveryPush, hasDeliveryPushSubscription } from "../lib/delivery-push";
 import {
   getDeliveryProfile,
   getDeliverySession,
@@ -88,22 +89,6 @@ function DeliveryPage() {
     }
   }
 
-  async function notifyNewOrder(order: DeliveryOrder) {
-    if (typeof window === "undefined" || !("Notification" in window) || Notification.permission !== "granted") return;
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification("Nova encomenda — Adson Fashion", {
-        body: `Cliente: ${order.customer_name}\nTotal: ${money(Number(order.total))} MT\nEntrega: ${order.delivery_address}`,
-        tag: `adson-fashion-order-${order.id}`,
-        icon: "/adson-fashion-icon.svg",
-        badge: "/adson-fashion-icon.svg",
-        data: { orderId: order.id },
-      });
-    } catch (error) {
-      console.error("Não foi possível mostrar a notificação:", error);
-    }
-  }
-
   async function loadOrders(showNotification = false) {
     setOrdersLoading(true);
     try {
@@ -117,7 +102,6 @@ function DeliveryPage() {
           setNewOrderAlert(newOrders[0]);
           window.setTimeout(() => setNewOrderAlert(null), 12000);
         }
-        newOrders.forEach(notifyNewOrder);
       }
       knownOrderIds.current = nextIds;
       firstOrdersLoad.current = false;
@@ -130,10 +114,12 @@ function DeliveryPage() {
 
   useEffect(() => {
     if (!profile) return;
-    if (typeof window !== "undefined" && "Notification" in window) {
-      const granted = Notification.permission === "granted";
-      setNotificationsEnabled(granted && await hasDeliveryPushSubscription());
-    }
+    void (async () => {
+      if (typeof window !== "undefined" && "Notification" in window) {
+        const granted = Notification.permission === "granted";
+        setNotificationsEnabled(granted && await hasDeliveryPushSubscription());
+      }
+    })();
     const timer = window.setInterval(() => { void loadOrders(true); }, 10000);
     return () => window.clearInterval(timer);
   }, [profile]);
