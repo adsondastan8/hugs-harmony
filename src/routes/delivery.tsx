@@ -15,7 +15,13 @@ import {
   type DeliveryOrderItem,
 } from "../lib/delivery-auth";
 
-export const Route = createFileRoute("/delivery")({ component: DeliveryPage });
+export const Route = createFileRoute("/delivery")({
+  component: DeliveryPage,
+  head: () => ({
+    meta: [{ title: "Adson Fashion Delivery" }],
+    links: [{ rel: "manifest", href: "/delivery.webmanifest?v=2" }],
+  }),
+});
 
 type Profile = { id:string; name:string; phone:string; login_email:string|null; is_online:boolean };
 
