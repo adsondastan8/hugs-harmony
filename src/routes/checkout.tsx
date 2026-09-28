@@ -166,9 +166,7 @@ function CheckoutPage() {
                   <div className="sm:col-span-2">
                     
                     <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                      <button type="button" onClick={() => setDeliveryZone("cidade")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "cidade" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
-                        <span className="block text-sm font-black">Dentro da cidade</span><span className={`mt-1 block text-xs ${deliveryZone === "cidade" ? "text-white/70" : "text-[#776e62]"}`}>Entrega grátis</span>
-                      </button>
+                      
                       <button type="button" onClick={() => setDeliveryZone("bairro")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "bairro" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
                         <span className="block text-sm font-black">Bairro</span><span className="mt-1 block text-xs text-white/70">A taxa é definida pelo local</span>
                       </button>
