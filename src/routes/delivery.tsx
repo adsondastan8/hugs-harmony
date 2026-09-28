@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { getDeliveryProfile, getDeliverySession, setDeliveryOnline, signInDelivery, signOutDelivery } from "../lib/delivery-auth";
+import { getDeliveryProfile, getDeliverySession, setDeliveryOnline, signInDelivery, signOutDelivery, signUpDelivery } from "../lib/delivery-auth";
 
 export const Route = createFileRoute("/delivery")({ component: DeliveryPage });
 
@@ -13,6 +13,7 @@ function DeliveryPage() {
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState("");
+  const [mode,setMode]=useState<"login"|"signup">("login");
 
   async function load() {
     setLoading(true); setError("");
@@ -30,11 +31,15 @@ function DeliveryPage() {
   async function login(e:FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
     try {
-      await signInDelivery(email.trim(),password);
+      if (mode === "signup") {
+        await signUpDelivery(email.trim(),password);
+      } else {
+        await signInDelivery(email.trim(),password);
+      }
       const p=await getDeliveryProfile();
       if (!p) { await signOutDelivery(); throw new Error("Este email ainda não foi associado a um delivery pelo administrador."); }
       setProfile(p);
-    } catch(e) { setError(e instanceof Error ? e.message : "Email ou palavra-passe inválidos."); }
+    } catch(e) { setError(e instanceof Error ? e.message : mode === "signup" ? "Não foi possível criar o acesso." : "Email ou palavra-passe inválidos."); }
     finally { setLoading(false); }
   }
 
@@ -58,14 +63,14 @@ function DeliveryPage() {
           <h1 className="mt-2 text-3xl font-black">Área do Delivery</h1>
           {!profile ? (
             <>
-              <p className="mt-2 text-sm leading-6 text-[#756f67]">Entre com o seu acesso individual para indicar quando está disponível para fazer entregas.</p>
+              <p className="mt-2 text-sm leading-6 text-[#756f67]">{mode === "login" ? "Entre com o seu acesso individual para indicar quando está disponível para fazer entregas." : "Primeiro acesso: use o email que o administrador associou ao seu delivery e crie a sua palavra-passe."}</p>
               {error && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div>}
               <form onSubmit={login} className="mt-6 grid gap-4">
                 <label className="text-sm font-bold">Email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-[#d9cebf] bg-white px-4 py-3 outline-none focus:border-[#b8905a]" placeholder="delivery@email.com"/></label>
                 <label className="text-sm font-bold">Palavra-passe<input required type="password" value={password} onChange={e=>setPassword(e.target.value)} className="mt-2 w-full rounded-xl border border-[#d9cebf] bg-white px-4 py-3 outline-none focus:border-[#b8905a]" placeholder="••••••••"/></label>
-                <button disabled={loading} className="rounded-xl bg-[#171512] px-5 py-3 font-bold text-white disabled:opacity-60">{loading ? "A entrar..." : "Entrar"}</button>
+                <button disabled={loading} className="rounded-xl bg-[#171512] px-5 py-3 font-bold text-white disabled:opacity-60">{loading ? "A processar..." : mode === "login" ? "Entrar" : "Criar acesso"}</button>
               </form>
-              <p className="mt-5 text-center text-xs text-[#8a8177]">O acesso é criado/configurado pelo administrador.</p>
+              <button type="button" onClick={()=>{setMode(mode === "login" ? "signup" : "login");setError("");}} className="mt-5 w-full text-center text-xs font-bold text-[#8b6b2f]">{mode === "login" ? "É o seu primeiro acesso? Criar acesso" : "Já tem acesso? Entrar"}</button>
             </>
           ) : (
             <>
