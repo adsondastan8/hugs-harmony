@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { listPublicProducts, type Product } from "../lib/supabase-data";
-
 export const Route = createFileRoute("/")({ component: StoreHome });
 
 function StoreHome() {
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => { void listPublicProducts().then(setProducts).catch(() => setProducts([])); }, []);
-
   return (
     <main className="min-h-screen bg-[#f6f6f4] text-[#17130d]">
       <header className="sticky top-0 z-30 border-b border-[#e5dccd]/80 bg-[#fffdf9]/95 backdrop-blur">
@@ -55,22 +49,16 @@ function StoreHome() {
         <div className="rounded-xl border border-[#e5dccd] bg-[#fffdf9] p-4"><p className="text-sm font-black">Atendimento</p><p className="mt-1 text-[11px] leading-4 text-[#776e62]">Confirmação rápida pelo WhatsApp.</p></div>
       </section>
 
-      {products.length > 0 && (
-        <section id="destaques" className="mx-auto max-w-7xl px-4 py-7 sm:px-6">
-          <div className="flex items-end justify-between gap-4">
-            <div><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#9a8f80]">Seleção da loja</p><h2 className="mt-1 text-xl font-black sm:text-2xl">Destaques</h2></div>
-            <button type="button" onClick={() => navigate({ to: "/produtos" })} className="text-xs font-bold underline underline-offset-4">Ver catálogo</button>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {products.slice(0, 4).map((product) => (
-              <button type="button" key={product.id} onClick={() => navigate({ to: "/produtos" })} className="overflow-hidden rounded-xl border border-[#e5dccd] bg-[#fffdf9] text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                {product.image_url ? <img src={product.image_url} alt={product.name} className="h-44 w-full object-cover sm:h-56" /> : <div className="flex h-44 items-center justify-center bg-[#f4efe6] text-3xl sm:h-56">🛍️</div>}
-                <div className="p-3"><p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#9a8f80]">{product.category}</p><p className="mt-1 truncate text-sm font-black">{product.name}</p><p className="mt-2 text-sm font-black">{Number(product.price).toLocaleString("pt-MZ")} MT</p></div>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="mx-auto max-w-7xl px-4 py-7 sm:px-6">
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/produtos" })}
+          className="w-full rounded-2xl bg-[#17130d] px-6 py-7 text-center text-white shadow-lg transition hover:bg-[#2a2319] active:scale-[0.99] sm:py-9"
+        >
+          <span className="block text-2xl font-black sm:text-3xl">Ver produtos</span>
+          <span className="mt-2 block text-sm text-white/60">Explore o catálogo completo da Adson Fashion →</span>
+        </button>
+      </section>
 
       <section id="experiencia" className="mx-auto max-w-7xl px-4 py-7 sm:px-6">
         <div className="rounded-2xl border border-[#e5dccd] bg-[#fffdf9] p-5 sm:p-7">
