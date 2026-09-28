@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY =
   "sb_publishable_uR7KW7wwI3A4TK_7QusPBA_lr269kHL";
 
 export const VAPID_PUBLIC_KEY =
-  "BPIcg3Jx7gvItkD85nbAoC1TS8xJRZOoDoNxMfUphYZtqVFxZRapd9JXp0alNWII-bnzdx0a0VrZ5q0Pvg0eHds";
+  "BBTAzWb5YiJmMVdE7XfXc5jIUa-FyTjg2Gzey3jexVBA5bPTM9fqBq7qB1b9I5lYgwg3gzQdf8yuTrj3vJCxEgg";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
