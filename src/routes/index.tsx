@@ -34,7 +34,7 @@ function StoreHome() {
           <div className="relative max-w-2xl">
             <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/80">Nova experiência de compra</span>
             <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">O seu estilo.<br /><span className="text-white/60">A sua escolha.</span></h1>
-            <p className="mt-4 max-w-xl text-sm leading-6 text-white/65 sm:text-base">Descubra peças, escolha os seus favoritos e faça a encomenda de forma simples. Sem conta e com pagamento na entrega.</p>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-white/65 sm:text-base">Descubra peças, escolha os seus favoritos e faça a sua encomenda de forma simples, rápida e segura. Pague apenas quando receber.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={() => navigate({ to: "/produtos" })} className="rounded-lg bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-slate-100">Explorar produtos →</button>
               <a href="#experiencia" className="rounded-lg border border-white/20 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10">Saber como funciona</a>
@@ -49,7 +49,7 @@ function StoreHome() {
       </section>
 
       <section className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-5 sm:grid-cols-4 sm:px-6">
-        <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-black">Compra simples</p><p className="mt-1 text-[11px] leading-4 text-slate-500">Sem criar conta para encomendar.</p></div>
+        <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-black">Compra simples</p><p className="mt-1 text-[11px] leading-4 text-slate-500">Encomenda simples e rápida.</p></div>
         <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-black">Entrega fácil</p><p className="mt-1 text-[11px] leading-4 text-slate-500">Escolha a sua zona de entrega.</p></div>
         <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-black">Pagamento</p><p className="mt-1 text-[11px] leading-4 text-slate-500">Pague quando receber.</p></div>
         <div className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-black">Atendimento</p><p className="mt-1 text-[11px] leading-4 text-slate-500">Confirmação rápida pelo WhatsApp.</p></div>
@@ -76,7 +76,7 @@ function StoreHome() {
         <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
           <div className="max-w-xl"><p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Uma compra sem complicação</p><h2 className="mt-1.5 text-xl font-black sm:text-2xl">Do produto à entrega em poucos passos.</h2></div>
           <div className="mt-6 grid gap-3 sm:grid-cols-4">
-            {[["01","Escolha","Explore o catálogo e selecione os produtos que quer encomendar."],["02","Revise","Confira quantidades e o valor da sua encomenda."],["03","Informe","Indique telefone, endereço, zona e hora de entrega."],["04","Confirme","O pedido é preparado para confirmação pelo WhatsApp."]].map(([number,title,description]) => <div key={number} className="rounded-xl bg-slate-50 p-4"><span className="text-[10px] font-black text-slate-400">{number}</span><h3 className="mt-3 text-sm font-black">{title}</h3><p className="mt-1.5 text-xs leading-5 text-slate-500">{description}</p></div>)}
+            {[["01","Escolha","Explore o catálogo e selecione os produtos que quer encomendar."],["02","Revise","Confira quantidades e o valor da sua encomenda."],["03","Informe","Indique telefone, endereço, zona e hora de entrega."],["04","Confirme","A sua encomenda é preparada e confirmada pelo WhatsApp."]].map(([number,title,description]) => <div key={number} className="rounded-xl bg-slate-50 p-4"><span className="text-[10px] font-black text-slate-400">{number}</span><h3 className="mt-3 text-sm font-black">{title}</h3><p className="mt-1.5 text-xs leading-5 text-slate-500">{description}</p></div>)}
           </div>
         </div>
       </section>
