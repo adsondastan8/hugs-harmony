@@ -164,7 +164,7 @@ function CheckoutPage() {
                   <p className="mt-2 text-xs font-semibold text-[#8b6b2f]">Taxa de delivery: {deliveryPlace === "bairro" ? (neighborhood ? `${neighborhoodFee} MT` : "selecione o bairro") : `${MID_DELIVERY_FEE} MT`}</p>
                   <label className="text-sm font-bold sm:col-span-2">{deliveryPlace === "bairro" ? "Endereço / ponto de referência" : "Indique a sua localização com detalhe"}<textarea required value={address} onChange={(e) => setAddress(e.target.value)} rows={3} placeholder={deliveryPlace === "bairro" ? "Rua, casa, ponto de referência..." : "Ex.: Mercado X, bairro/zona, rua, próximo de..., nome do serviço ou outro ponto de referência..."} className={fieldClass} /><span className="mt-1 block text-xs font-normal text-[#776e62]">{deliveryPlace === "bairro" ? "Indique a rua, casa e uma referência para facilitar a entrega." : "Escreva o máximo de detalhes possível para o entregador encontrar a sua localização."}</span></label>
                   <div className="sm:col-span-2">
-                    <p className="text-sm font-bold">Zona de entrega</p>
+                    
                     <div className="mt-2 grid gap-3 sm:grid-cols-2">
                       <button type="button" onClick={() => setDeliveryZone("cidade")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "cidade" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
                         <span className="block text-sm font-black">Dentro da cidade</span><span className={`mt-1 block text-xs ${deliveryZone === "cidade" ? "text-white/70" : "text-[#776e62]"}`}>Entrega grátis</span>
