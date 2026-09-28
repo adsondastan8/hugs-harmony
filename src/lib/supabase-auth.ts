@@ -117,6 +117,7 @@ export async function getCurrentUser() {
     const data = await supabaseAuthRequest("/user", {
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
+    if (data?.app_metadata?.role !== "admin") return null;
     return data;
   } catch {
     saveSession(null);
