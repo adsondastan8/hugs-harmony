@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { listPublicProducts, type Product } from "../lib/supabase-data";
 
@@ -71,7 +71,7 @@ function ProductsPage() {
     ((selectedProduct.colors?.length ?? 0) === 0 || !!selectedOrderItem?.color) &&
     ((selectedProduct.sizes?.length ?? 0) === 0 || !!selectedOrderItem?.size);
 
-  function getColorStyle(value: string): React.CSSProperties {
+  function getColorStyle(value: string): CSSProperties {
     const color = value.trim().toLowerCase();
     const aliases: Record<string, string> = {
       preto: "#17130d", black: "#17130d",
