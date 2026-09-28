@@ -124,11 +124,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        void navigator.serviceWorker.register("/sw.js?v=4");
+    if (!("serviceWorker" in navigator)) return;
+
+    void navigator.serviceWorker
+      .register("/sw.js?v=4", { scope: "/" })
+      .then((registration) => registration.update())
+      .catch((error) => {
+        console.error("Não foi possível registar o Service Worker:", error);
       });
-    }
   }, []);
 
   return (
