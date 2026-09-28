@@ -11,7 +11,7 @@ const CITY_DELIVERY_FEE = 0;
 const NEAR_DELIVERY_FEE = 50;
 const MID_DELIVERY_FEE = 80;
 const NEAR_NEIGHBORHOODS = ["Popular", "Muchenga", "N'zinje", "Estação", "Cerâmica", "Chiuaula / Luchiringo"];
-const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger", "Assumane", "Sambula", "Mitava", "Utumuile", "Ntoto", "Naluila"];
+const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger"];
 
 function readCart(): CartItem[] {
   try { return JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
@@ -30,7 +30,8 @@ function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [notes, setNotes] = useState("");
-  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("cidade");
+  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("bairro");
+  const [deliveryPlace, setDeliveryPlace] = useState<"bairro" | "ponto">("bairro");
 
   const neighborhoodFee = NEAR_NEIGHBORHOODS.includes(neighborhood) ? NEAR_DELIVERY_FEE : MID_NEIGHBORHOODS.includes(neighborhood) ? MID_DELIVERY_FEE : MID_DELIVERY_FEE;
   const [error, setError] = useState("");
@@ -46,7 +47,7 @@ function CheckoutPage() {
   }).filter(Boolean) as Array<{ product: Product; quantity: number }>;
 
   const subtotal = lines.reduce((sum, line) => sum + Number(line.product.price) * line.quantity, 0);
-  const deliveryFee = deliveryZone === "bairro" ? neighborhoodFee : CITY_DELIVERY_FEE;
+  const deliveryFee = deliveryPlace === "bairro" ? neighborhoodFee : MID_DELIVERY_FEE;
   const total = subtotal + deliveryFee;
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);
 
@@ -61,12 +62,12 @@ function CheckoutPage() {
     event.preventDefault();
     setError("");
     if (lines.length === 0) { setError("O seu pedido está vazio."); return; }
-    if (!name.trim() || !phone.trim() || !neighborhood || !address.trim() || !deliveryTime) {
+    if (!name.trim() || !phone.trim() || (deliveryPlace === "bairro" && !neighborhood) || !address.trim() || !deliveryTime) {
       setError("Preencha nome, telefone, bairro, endereço/referência e a hora desejada para receber a encomenda.");
       return;
     }
 
-    const zoneLabel = deliveryZone === "cidade" ? "Dentro da cidade (grátis)" : `Bairro ${neighborhood} (${deliveryFee} MT)`;
+    const zoneLabel = deliveryPlace === "bairro" ? `Bairro ${neighborhood} (${deliveryFee} MT)` : `Ponto de entrega: ${address.trim()} (${deliveryFee} MT)`;
     const message = [
       "Olá, Adson Fashion! Quero fazer uma encomenda.",
       "",
@@ -80,7 +81,7 @@ function CheckoutPage() {
       "",
       `Nome: ${name.trim()}`,
       `Telefone: ${phone.trim()}`,
-      `Bairro: ${neighborhood.trim()}`,
+      deliveryPlace === "bairro" ? `Bairro: ${neighborhood.trim()}` : "Local: mercado / serviço / outro ponto",
       `Endereço / referência: ${address.trim()}`,
       `Hora desejada para receber: ${deliveryTime}`,
       notes.trim() ? `Observação: ${notes.trim()}` : "",
@@ -158,9 +159,10 @@ function CheckoutPage() {
                   <label className="text-sm font-bold sm:col-span-2">Nome completo<input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Adson Dastan" className={fieldClass} /></label>
                   <label className="text-sm font-bold">Telefone<input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+258 84 000 0000" className={fieldClass} /></label>
                   <label className="text-sm font-bold">Hora desejada<input required type="time" value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className={fieldClass} /></label>
-                  <label className="text-sm font-bold">Bairro<select required value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className={fieldClass}><option value="">Selecione o bairro</option><option>Sanjala</option><option>N'zinje</option><option>Muchenga</option><option>Popular</option><option>Namacula</option><option>Chiulugo</option><option>Chiuaula / Luchiringo</option><option>Estação</option><option>Cerâmica</option><option>Massenger</option><option>Assumane</option><option>Sambula</option><option>23 de Setembro</option><option>Mitava</option><option>Utumuile</option><option>Ntoto</option><option>Naluila</option></select></label>
-                  <p className="mt-2 text-xs font-semibold text-[#8b6b2f]">Taxa de delivery: {neighborhood ? `${neighborhoodFee} MT` : "selecione o bairro"}</p>
-                  <label className="text-sm font-bold">Endereço / ponto de referência<input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua, casa, ponto de referência..." className={fieldClass} /></label>
+                  <label className={`text-sm font-bold ${deliveryPlace === "bairro" ? "" : "opacity-60"}`}>Bairro<select required={deliveryPlace === "bairro"} disabled={deliveryPlace !== "bairro"} value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className={fieldClass}><option value="">Selecione o bairro</option><option>Sanjala</option><option>N'zinje</option><option>Muchenga</option><option>Popular</option><option>Namacula</option><option>Chiulugo</option><option>Chiuaula / Luchiringo</option><option>Estação</option><option>Cerâmica</option><option>Massenger</option><option>Assumane</option><option>Sambula</option><option>23 de Setembro</option><option>Mitava</option><option>Utumuile</option><option>Ntoto</option><option>Naluila</option></select></label>
+                  <div className="mt-2 grid gap-3 sm:grid-cols-2"><button type="button" onClick={() => setDeliveryPlace("bairro")} className={`rounded-xl border p-4 text-left ${deliveryPlace === "bairro" ? "border-[#17130d] bg-[#17130d] text-white" : "border-[#e5dccd] bg-[#fffdf9]"}`}><span className="block text-sm font-black">Entrega no bairro</span><span className="mt-1 block text-xs opacity-70">Escolha o bairro abaixo</span></button><button type="button" onClick={() => setDeliveryPlace("ponto")} className={`rounded-xl border p-4 text-left ${deliveryPlace === "ponto" ? "border-[#17130d] bg-[#17130d] text-white" : "border-[#e5dccd] bg-[#fffdf9]"}`}><span className="block text-sm font-black">Mercado / serviço / outro local</span><span className="mt-1 block text-xs opacity-70">Indique o ponto de entrega</span></button></div>
+                  <p className="mt-2 text-xs font-semibold text-[#8b6b2f]">Taxa de delivery: {deliveryPlace === "bairro" ? (neighborhood ? `${neighborhoodFee} MT` : "selecione o bairro") : `${MID_DELIVERY_FEE} MT`}</p>
+                  <label className="text-sm font-bold">{deliveryPlace === "bairro" ? "Endereço / ponto de referência" : "Mercado / serviço / ponto de entrega"}<input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua, casa, ponto de referência..." className={fieldClass} /></label>
                   <div className="sm:col-span-2">
                     <p className="text-sm font-bold">Zona de entrega</p>
                     <div className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -168,7 +170,7 @@ function CheckoutPage() {
                         <span className="block text-sm font-black">Dentro da cidade</span><span className={`mt-1 block text-xs ${deliveryZone === "cidade" ? "text-white/70" : "text-[#776e62]"}`}>Entrega grátis</span>
                       </button>
                       <button type="button" onClick={() => setDeliveryZone("bairro")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "bairro" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
-                        <span className="block text-sm font-black">Bairro</span><span className={`mt-1 block text-xs ${deliveryZone === "bairro" ? "text-white/70" : "text-[#776e62]"}`}>A taxa é definida pelo bairro</span>
+                        <span className="block text-sm font-black">Bairro</span><span className="mt-1 block text-xs text-white/70">A taxa é definida pelo local</span>
                       </button>
                     </div>
                   </div>
