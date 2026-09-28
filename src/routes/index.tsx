@@ -134,6 +134,13 @@ function AdminLogin() {
             </button>
           </form>
 
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+            <p className="text-sm font-semibold text-slate-700">É cliente da Adson Fashion?</p>
+            <button type="button" onClick={() => navigate({ to: "/cliente" })} className="mt-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm ring-1 ring-slate-200">
+              Criar conta / Entrar como cliente
+            </button>
+          </div>
+
           <div className="mt-7 border-t border-slate-200 pt-6 text-center">
             <p className="text-xs leading-5 text-slate-500">
               A autenticação é feita pelo Supabase. A palavra-passe não é guardada no código da loja.
