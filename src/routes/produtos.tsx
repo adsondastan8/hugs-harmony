@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { listPublicProducts, type Product } from "../lib/supabase-data";
 
 type OrderItem = { productId: string; quantity: number; color?: string; size?: string };
-const ORDER_KEY = "adson-fashion-cart";
+// Lovable preview sync marker: 2026-09-28\nconst ORDER_KEY = "adson-fashion-cart";
 
 function readOrder(): OrderItem[] {
   try { return JSON.parse(localStorage.getItem(ORDER_KEY) ?? "[]") as OrderItem[]; } catch { return []; }
