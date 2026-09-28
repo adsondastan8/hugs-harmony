@@ -53,8 +53,14 @@ export async function listPublicProducts() {
     return (await request(query, {}, false)) as Product[];
   } catch {
     const response = await fetch(
-      `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/products?select=id,name,category,price,stock,created_at,image_url&order=created_at.desc`,
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, "Content-Type": "application/json" } },
+      `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/products?select=id,name,category,price,stock,created_at,image_url,colors,sizes&order=created_at.desc`,
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+      },
     );
     if (!response.ok) throw new Error("Não foi possível carregar os produtos.");
     return (await response.json()) as Product[];
