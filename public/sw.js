@@ -1,4 +1,4 @@
-const CACHE_NAME = "adson-fashion-pwa-v1";
+const CACHE_NAME = "adson-fashion-pwa-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/adson-fashion-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -23,5 +23,20 @@ self.addEventListener("fetch", (event) => {
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
       return response;
     }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const orderId = event.notification.data?.orderId;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      const target = clients.find((client) => "focus" in client);
+      if (target) {
+        if (orderId) target.postMessage({ type: "OPEN_DELIVERY_ORDER", orderId });
+        return target.focus();
+      }
+      return self.clients.openWindow("/delivery");
+    })
   );
 });
