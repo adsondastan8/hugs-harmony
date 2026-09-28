@@ -73,24 +73,39 @@ function CheckoutPage() {
       return;
     }
 
-    const zoneLabel = deliveryPlace === "bairro" ? `Bairro ${neighborhood} (${deliveryFee} MT)` : `Ponto de entrega: ${address.trim()} (${deliveryFee} MT)`;
     const message = [
-      "Olá, Adson Fashion! Quero fazer uma encomenda.",
+      "🛍️ *ADSON FASHION*",
+      "━━━━━━━━━━━━━━━━━━━━",
+      "✨ *NOVA ENCOMENDA*",
       "",
-      ...lines.map((line) => `• ${line.product.name} × ${line.quantity}${line.color ? ` · Cor: ${line.color}` : ""}${line.size ? ` · Tamanho: ${line.size}` : ""} — ${(Number(line.product.price) * line.quantity).toLocaleString("pt-MZ")} MT`),
+      "*🧾 PRODUTOS*",
+      ...lines.map((line, index) => [
+        `*\${index + 1}. ${line.product.name}*`,
+        `   Quantidade: ${line.quantity}`,
+        line.color ? `   Cor: ${line.color}` : "",
+        line.size ? `   ${line.product.category === "Calçado" ? "Número" : "Tamanho"}: ${line.size}` : "",
+        `   Preço: ${(Number(line.product.price) * line.quantity).toLocaleString("pt-MZ")} MT`,
+      ].filter(Boolean).join("\n")),
       "",
-      `Subtotal: ${subtotal.toLocaleString("pt-MZ")} MT`,
-      `Zona de entrega: ${zoneLabel}`,
-      `Taxa de delivery: ${deliveryFee.toLocaleString("pt-MZ")} MT`,
-      `Total: ${total.toLocaleString("pt-MZ")} MT`,
-      "Pagamento: na entrega",
+      "━━━━━━━━━━━━━━━━━━━━",
+      "*💰 RESUMO DO PAGAMENTO*",
+      `Produtos: ${subtotal.toLocaleString("pt-MZ")} MT`,
+      `Entrega: ${deliveryFee === 0 ? "Grátis" : `${deliveryFee.toLocaleString("pt-MZ")} MT`}`,
+      `*TOTAL: ${total.toLocaleString("pt-MZ")} MT*`,
+      "Pagamento: *na entrega*",
       "",
+      "*📍 ENTREGA*",
+      deliveryPlace === "bairro" ? `Bairro: ${neighborhood.trim()}` : "Local: Mercado / serviço / outro ponto",
+      `Localização / referência: ${address.trim()}`,
+      `Hora preferida: ${deliveryTime}`,
+      "",
+      "*👤 CLIENTE*",
       `Nome: ${name.trim()}`,
       `Telefone: ${phone.trim()}`,
-      deliveryPlace === "bairro" ? `Bairro: ${neighborhood.trim()}` : "Local: mercado / serviço / outro ponto",
-      `Endereço / referência: ${address.trim()}`,
-      `Hora desejada para receber: ${deliveryTime}`,
       notes.trim() ? `Observação: ${notes.trim()}` : "",
+      "",
+      "Obrigado por escolher a *Adson Fashion*! 🤝",
+      "A nossa equipa irá confirmar a encomenda pelo WhatsApp.",
     ].filter(Boolean).join("\n");
 
     try {
