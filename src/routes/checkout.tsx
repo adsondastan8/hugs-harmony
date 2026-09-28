@@ -50,7 +50,7 @@ function CheckoutPage() {
     if (item.color) line.color = item.color;
     if (item.size) line.size = item.size;
     return line;
-  }).filter(Boolean) as Array<{ product: Product; quantity: number }>;
+  }).filter(Boolean) as Array<{ product: Product; quantity: number; color?: string; size?: string }>;
 
   const subtotal = lines.reduce((sum, line) => sum + Number(line.product.price) * line.quantity, 0);
   const deliveryFee = deliveryPlace === "bairro" ? neighborhoodFee : MID_DELIVERY_FEE;
