@@ -130,6 +130,7 @@ function CheckoutPage() {
         deliveryAddress,
         total,
         notes: notes.trim(),
+        deliveryId: selectedDelivery.id,
         items: lines.map((line) => {
           const item: { productId: string; quantity: number; color?: string; size?: string } = {
             productId: line.product.id,
