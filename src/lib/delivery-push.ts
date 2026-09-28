@@ -58,10 +58,16 @@ export async function subscribeDeliveryPush(deliveryId: string) {
     throw new Error("O Chrome não devolveu uma subscription Push válida.");
   }
 
-  const response = await fetch(
-    `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/register-delivery-push`,
-    {
-      method: "POST",
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+
+  let response: Response;
+  try {
+    response = await fetch(
+      `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/delivery_push_subscriptions?on_conflict=endpoint`,
+      {
+        method: "POST",
+        signal: controller.signal,
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${session.access_token}`,
