@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { listPublicProducts, type Product } from "../lib/supabase-data";
 type CartItem = { productId: string; quantity: number };
 const CART_KEY = "adson-fashion-cart";
-const STORE_WHATSAPP_NUMBER = ""; // Definir o número oficial da loja antes de publicar.
+const STORE_WHATSAPP_NUMBER = "258853131247";
 function readCart(): CartItem[] { try { return JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; } }
 function writeCart(items: CartItem[]) { localStorage.setItem(CART_KEY, JSON.stringify(items)); }
 export const Route = createFileRoute("/checkout")({ component: CheckoutPage });
