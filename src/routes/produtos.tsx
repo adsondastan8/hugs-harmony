@@ -109,7 +109,7 @@ function ProductsPage() {
     const direct = aliases[color];
     if (direct) return { backgroundColor: direct };
     if (color.startsWith("#") || color.startsWith("rgb(") || color.startsWith("hsl(")) return { backgroundColor: value };
-    const parts = color.split(/\\s*(?:,|\\+|\\/| e )\\s*/).map((part) => aliases[part] ?? part).filter(Boolean);
+    const parts = color.split(/\s*(?:,|\+|\/| e )\s*/).map((part) => aliases[part] ?? part).filter(Boolean);
     if (parts.length > 1 && parts.every((part) => /^(#|rgb|hsl|[a-z])/i.test(part))) {
       return { background: `linear-gradient(135deg, ${parts.join(", ")} )` };
     }
