@@ -1,14 +1,21 @@
 import { FormEvent, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createProduct,
+  deleteProduct,
+  listProducts,
+  updateProduct,
+  uploadProductImage,
+  type Product,
+} from "../lib/supabase-data";
 import { getCurrentUser, signOut } from "../lib/supabase-auth";
-import { createProduct, deleteProduct, listProducts, type Product } from "../lib/supabase-data";
 
 export const Route = createFileRoute("/admin")({
   component: AdminDashboard,
 });
 
 const cards = [
-  ["📦", "Produtos", "Cadastrar e gerir os produtos da loja.", "produtos"],
+  ["📦", "Produtos", "Cadastrar, editar e gerir o estoque.", "produtos"],
   ["🛒", "Pedidos", "Ver e confirmar pedidos dos clientes.", null],
   ["👥", "Clientes", "Consultar os clientes registados.", null],
   ["📊", "Estatísticas", "Acompanhar o movimento da loja.", null],
@@ -23,10 +30,12 @@ function AdminDashboard() {
   const [productLoading, setProductLoading] = useState(false);
   const [productSaving, setProductSaving] = useState(false);
   const [productError, setProductError] = useState("");
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
   const [productCategory, setProductCategory] = useState("Roupa");
   const [productPrice, setProductPrice] = useState("");
   const [productStock, setProductStock] = useState("");
+  const [productImage, setProductImage] = useState<File | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -77,30 +86,115 @@ function AdminDashboard() {
     };
   }, [module]);
 
-  async function addProduct(event: FormEvent<HTMLFormElement>) {
+  function resetProductForm() {
+    setEditingProductId(null);
+    setProductName("");
+    setProductCategory("Roupa");
+    setProductPrice("");
+    setProductStock("");
+    setProductImage(null);
+  }
+
+  function startEditing(product: Product) {
+    setEditingProductId(product.id);
+    setProductName(product.name);
+    setProductCategory(product.category);
+    setProductPrice(String(product.price));
+    setProductStock(String(product.stock));
+    setProductImage(null);
+    setProductError("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function saveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setProductError("");
+
     const price = Number(productPrice.replace(",", "."));
     const stock = Number(productStock);
-    if (!productName.trim() || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
+
+    if (
+      !productName.trim() ||
+      !Number.isFinite(price) ||
+      price < 0 ||
+      !Number.isInteger(stock) ||
+      stock < 0
+    ) {
       setProductError("Preencha nome, preço e estoque corretamente.");
       return;
     }
+
     setProductSaving(true);
+
     try {
       const user = await getCurrentUser();
-      if (!user) { navigate({ to: "/" }); return; }
-      const product = await createProduct({ name: productName.trim(), category: productCategory, price, stock, created_by: user.id });
-      setProducts((current) => [product, ...current]);
-      setProductName(""); setProductPrice(""); setProductStock("");
+      if (!user) {
+        navigate({ to: "/" });
+        return;
+      }
+
+      if (editingProductId) {
+        const current = products.find((product) => product.id === editingProductId);
+        let imageUrl = current?.image_url ?? null;
+
+        if (productImage) {
+          imageUrl = await uploadProductImage(editingProductId, productImage);
+        }
+
+        const updated = await updateProduct(editingProductId, {
+          name: productName.trim(),
+          category: productCategory,
+          price,
+          stock,
+          image_url: imageUrl,
+        });
+
+        setProducts((items) =>
+          items.map((item) => (item.id === editingProductId ? updated : item)),
+        );
+      } else {
+        const created = await createProduct({
+          name: productName.trim(),
+          category: productCategory,
+          price,
+          stock,
+          created_by: user.id,
+        });
+
+        let createdProduct = created;
+        if (productImage) {
+          const imageUrl = await uploadProductImage(created.id, productImage);
+          createdProduct = await updateProduct(created.id, {
+            name: created.name,
+            category: created.category,
+            price: Number(created.price),
+            stock: created.stock,
+            image_url: imageUrl,
+          });
+        }
+
+        setProducts((items) => [createdProduct, ...items]);
+      }
+
+      resetProductForm();
     } catch (e) {
       setProductError(e instanceof Error ? e.message : "Não foi possível guardar o produto.");
-    } finally { setProductSaving(false); }
+    } finally {
+      setProductSaving(false);
+    }
   }
 
   async function removeProduct(id: string) {
-    try { await deleteProduct(id); setProducts((current) => current.filter((p) => p.id !== id)); }
-    catch (e) { setProductError(e instanceof Error ? e.message : "Não foi possível remover o produto."); }
+    if (!window.confirm("Tem certeza que deseja remover este produto?")) return;
+
+    setProductError("");
+    try {
+      await deleteProduct(id);
+      setProducts((items) => items.filter((product) => product.id !== id));
+      if (editingProductId === id) resetProductForm();
+    } catch (e) {
+      setProductError(e instanceof Error ? e.message : "Não foi possível remover o produto.");
+    }
   }
 
   async function handleLogout() {
@@ -120,25 +214,205 @@ function AdminDashboard() {
     return (
       <main className="min-h-screen bg-slate-100 text-slate-900">
         <header className="border-b border-slate-200 bg-slate-950 text-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
-            <div><p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p><h1 className="mt-1 text-2xl font-black">Produtos</h1></div>
-            <button type="button" onClick={() => setModule("dashboard")} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold">Voltar ao painel</button>
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p>
+              <h1 className="mt-1 text-2xl font-black">Gestão de produtos</h1>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                resetProductForm();
+                setModule("dashboard");
+              }}
+              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold"
+            >
+              Voltar ao painel
+            </button>
           </div>
         </header>
-        <section className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-          <h2 className="text-4xl font-black">Adicionar produto</h2>
-          <p className="mt-3 text-slate-600">Os produtos serão guardados no Supabase.</p>
-          {productError && <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{productError}</div>}
-          <form onSubmit={addProduct} className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="grid gap-5 md:grid-cols-2">
-              <input required value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nome do produto" className="rounded-xl border border-slate-300 px-4 py-3" />
-              <select value={productCategory} onChange={(e) => setProductCategory(e.target.value)} className="rounded-xl border border-slate-300 bg-white px-4 py-3"><option>Roupa</option><option>Calçado</option><option>Acessório</option><option>Outro</option></select>
-              <input required value={productPrice} onChange={(e) => setProductPrice(e.target.value)} inputMode="decimal" placeholder="Preço (MT)" className="rounded-xl border border-slate-300 px-4 py-3" />
-              <input required value={productStock} onChange={(e) => setProductStock(e.target.value)} inputMode="numeric" placeholder="Estoque" className="rounded-xl border border-slate-300 px-4 py-3" />
+
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                  {editingProductId ? "Editar produto" : "Novo produto"}
+                </p>
+                <h2 className="mt-1 text-3xl font-black">
+                  {editingProductId ? "Atualizar produto" : "Adicionar produto"}
+                </h2>
+              </div>
+              {editingProductId && (
+                <button
+                  type="button"
+                  onClick={resetProductForm}
+                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold"
+                >
+                  Cancelar edição
+                </button>
+              )}
             </div>
-            <button type="submit" disabled={productSaving} className="mt-6 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white disabled:opacity-60">{productSaving ? "A guardar..." : "Guardar produto"}</button>
-          </form>
-          <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">{productLoading ? <p className="p-8 text-center text-slate-500">A carregar...</p> : products.length === 0 ? <p className="p-8 text-center text-slate-500">Ainda não há produtos.</p> : products.map((p) => <div key={p.id} className="flex items-center justify-between border-b border-slate-200 p-5"><div><b>{p.name}</b><p className="text-sm text-slate-500">{p.category} · {p.stock} em estoque</p></div><div className="flex items-center gap-4"><b>{Number(p.price).toLocaleString("pt-MZ")} MT</b><button type="button" onClick={() => void removeProduct(p.id)} className="text-sm font-semibold text-red-600">Remover</button></div></div>)}</div>
+
+            {productError && (
+              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                {productError}
+              </div>
+            )}
+
+            <form onSubmit={saveProduct} className="mt-7">
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="grid gap-2 text-sm font-semibold">
+                  Nome
+                  <input
+                    required
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="Nome do produto"
+                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold">
+                  Categoria
+                  <select
+                    value={productCategory}
+                    onChange={(e) => setProductCategory(e.target.value)}
+                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal"
+                  >
+                    <option>Roupa</option>
+                    <option>Calçado</option>
+                    <option>Acessório</option>
+                    <option>Outro</option>
+                  </select>
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold">
+                  Preço (MT)
+                  <input
+                    required
+                    value={productPrice}
+                    onChange={(e) => setProductPrice(e.target.value)}
+                    inputMode="decimal"
+                    placeholder="Ex.: 1999"
+                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold">
+                  Estoque
+                  <input
+                    required
+                    value={productStock}
+                    onChange={(e) => setProductStock(e.target.value)}
+                    inputMode="numeric"
+                    placeholder="Quantidade disponível"
+                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold md:col-span-2">
+                  Foto do produto
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    onChange={(e) => setProductImage(e.target.files?.[0] ?? null)}
+                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-normal"
+                  />
+                  <span className="text-xs font-normal text-slate-500">
+                    JPG, PNG, WEBP ou GIF — máximo 6 MB.
+                    {productImage ? ` Selecionada: ${productImage.name}` : ""}
+                  </span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={productSaving}
+                className="mt-6 rounded-xl bg-slate-950 px-6 py-3 font-bold text-white disabled:opacity-60"
+              >
+                {productSaving
+                  ? "A guardar..."
+                  : editingProductId
+                    ? "Guardar alterações"
+                    : "Guardar produto"}
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-8">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-2xl font-black">Produtos cadastrados</h2>
+              <span className="rounded-full bg-slate-200 px-3 py-1 text-sm font-bold">
+                {products.length}
+              </span>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {productLoading ? (
+                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 sm:col-span-2 lg:col-span-3">
+                  A carregar produtos...
+                </div>
+              ) : products.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 sm:col-span-2 lg:col-span-3">
+                  Ainda não há produtos.
+                </div>
+              ) : (
+                products.map((product) => (
+                  <article
+                    key={product.id}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                  >
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="h-52 w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-52 items-center justify-center bg-slate-100 text-5xl">
+                        🛍️
+                      </div>
+                    )}
+
+                    <div className="p-5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-lg font-black">{product.name}</h3>
+                          <p className="mt-1 text-sm text-slate-500">{product.category}</p>
+                        </div>
+                        <p className="text-lg font-black">
+                          {Number(product.price).toLocaleString("pt-MZ")} MT
+                        </p>
+                      </div>
+
+                      <div className="mt-4 rounded-xl bg-slate-100 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Estoque</p>
+                        <p className="mt-1 text-xl font-black">{product.stock} unidades</p>
+                      </div>
+
+                      <div className="mt-5 flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => startEditing(product)}
+                          className="flex-1 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void removeProduct(product.id)}
+                          className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-600"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+          </div>
         </section>
       </main>
     );
@@ -153,7 +427,11 @@ function AdminDashboard() {
             <h1 className="mt-1 text-2xl font-black">Painel do ADM</h1>
             {email && <p className="mt-1 text-xs text-slate-400">{email}</p>}
           </div>
-          <button type="button" onClick={handleLogout} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800"
+          >
             Sair
           </button>
         </div>
@@ -175,23 +453,24 @@ function AdminDashboard() {
               <h3 className="mt-5 text-xl font-bold text-slate-950">{title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
               {action ? (
-                <button type="button" onClick={() => setModule("produtos")} className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setModule("produtos")}
+                  className="mt-5 rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
+                >
                   Abrir módulo
                 </button>
               ) : (
-                <button type="button" disabled className="mt-5 cursor-not-allowed rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
+                <button
+                  type="button"
+                  disabled
+                  className="mt-5 cursor-not-allowed rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500"
+                >
                   Em breve
                 </button>
               )}
             </article>
           ))}
-        </div>
-
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-          <h3 className="text-xl font-bold text-slate-950">Próximas funções</h3>
-          <p className="mt-2 text-slate-600">
-            O próximo passo será ligar os produtos ao Supabase para que os dados fiquem guardados permanentemente.
-          </p>
         </div>
       </section>
     </main>
