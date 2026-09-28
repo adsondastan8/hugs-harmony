@@ -181,7 +181,7 @@ function CheckoutPage() {
                   </div>
                   <button type="submit" form="checkout-form" className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-4 font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800">Confirmar encomenda <span>→</span></button>
                   <p className="mt-3 text-center text-[11px] leading-5 text-slate-400">Ao continuar, o seu pedido será preparado para envio no WhatsApp da Adson Fashion.</p>
-                  <div className="mt-5 grid grid-cols-3 border-t border-slate-100 pt-5 text-center text-[11px] font-semibold text-slate-500"><span>✓ Sem conta</span><span>✓ Pagamento na entrega</span><span>✓ WhatsApp</span></div>
+                  <div className="mt-5 grid grid-cols-3 border-t border-slate-100 pt-5 text-center text-[11px] font-semibold text-slate-500"><span>✓ Compra simples</span><span>✓ Pagamento na entrega</span><span>✓ WhatsApp</span></div>
                 </div>
               </div>
             </aside>
