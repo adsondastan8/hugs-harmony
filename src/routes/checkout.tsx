@@ -45,7 +45,11 @@ function CheckoutPage() {
 
   const lines = cart.map((item) => {
     const product = products.find((p) => p.id === item.productId);
-    return product ? { product, quantity: Math.min(item.quantity, product.stock), color: item.color, size: item.size } : null;
+    if (!product) return null;
+    const line: CartItem & { product: Product } = { product, quantity: Math.min(item.quantity, product.stock) };
+    if (item.color) line.color = item.color;
+    if (item.size) line.size = item.size;
+    return line;
   }).filter(Boolean) as Array<{ product: Product; quantity: number }>;
 
   const subtotal = lines.reduce((sum, line) => sum + Number(line.product.price) * line.quantity, 0);
@@ -99,7 +103,15 @@ function CheckoutPage() {
         deliveryAddress,
         total,
         notes: notes.trim(),
-        items: lines.map((line) => ({ productId: line.product.id, quantity: line.quantity, color: line.color, size: line.size })),
+        items: lines.map((line) => {
+          const item: { productId: string; quantity: number; color?: string; size?: string } = {
+            productId: line.product.id,
+            quantity: line.quantity,
+          };
+          if (line.color) item.color = line.color;
+          if (line.size) item.size = line.size;
+          return item;
+        }),
       });
 
       localStorage.removeItem(CART_KEY);
