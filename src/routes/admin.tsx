@@ -8,7 +8,7 @@ import {
   uploadProductImage,
   type Product,
 } from "../lib/supabase-data";
-import { getCurrentUser, signIn, signOut } from "../lib/supabase-auth";
+import { getCurrentUser, signIn, signOut, signUp } from "../lib/supabase-auth";
 import { listCustomers, type Customer } from "../lib/supabase-customers";
 import {
   buildOrderWhatsAppUrl,
@@ -36,7 +36,8 @@ function AdminDashboard() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
-  const authMode = "login" as const;
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
@@ -89,11 +90,25 @@ function AdminDashboard() {
     setAuthError("");
     setAuthLoading(true);
     try {
-      await signIn(authEmail.trim(), authPassword);
-      const user = await getCurrentUser();
-      if (!user) throw new Error("Não foi possível iniciar a sessão.");
-      setAuthenticated(true);
-      setEmail(user.email ?? "");
+      if (authMode === "signup") {
+        if (!authName.trim()) throw new Error("Informe o seu nome.");
+        const result = await signUp(authEmail.trim(), authPassword, authName.trim());
+        if (result.needsEmailConfirmation) {
+          setAuthError("Conta criada. Confirme o e-mail e depois faça login. O acesso ao ADM precisa ser autorizado pelo administrador.");
+          setAuthMode("login");
+          return;
+        }
+        const user = await getCurrentUser();
+        if (!user) throw new Error("Conta criada, mas ainda não tem permissão de administrador. O administrador precisa autorizar esta conta.");
+        setAuthenticated(true);
+        setEmail(user.email ?? "");
+      } else {
+        await signIn(authEmail.trim(), authPassword);
+        const user = await getCurrentUser();
+        if (!user) throw new Error("Conta sem permissão de administrador.");
+        setAuthenticated(true);
+        setEmail(user.email ?? "");
+      }
     } catch (e) {
       setAuthError(e instanceof Error ? e.message : "Não foi possível entrar.");
     } finally {
@@ -286,13 +301,19 @@ function AdminDashboard() {
         <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Adson Fashion</p>
           <h1 className="mt-3 text-3xl font-black">Área do ADM</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">Acesso exclusivo para administrar produtos, estoque e pedidos.</p>
+          <p className="mt-3 text-sm leading-6 text-slate-500">Entre no painel ou crie uma conta de administrador para solicitar acesso.</p>
+          <div className="mt-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
+            <button type="button" onClick={() => { setAuthMode("login"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "login" ? "bg-white shadow-sm" : "text-slate-500"}`}>Entrar</button>
+            <button type="button" onClick={() => { setAuthMode("signup"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "signup" ? "bg-white shadow-sm" : "text-slate-500"}`}>Criar conta</button>
+          </div>
           {authError && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
           <form onSubmit={submitAuth} className="mt-6 space-y-4">
-            <label className="grid gap-2 text-sm font-semibold">E-mail<input required type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
-            <label className="grid gap-2 text-sm font-semibold">Palavra-passe<input required minLength={6} type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
-            <button disabled={authLoading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : "Entrar no ADM"}</button>
+            {authMode === "signup" && <label className="grid gap-2 text-sm font-semibold">Nome<input required value={authName} onChange={(e) => setAuthName(e.target.value)} placeholder="Seu nome" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>}
+            <label className="grid gap-2 text-sm font-semibold">E-mail<input required type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="seu@email.com" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
+            <label className="grid gap-2 text-sm font-semibold">Palavra-passe<input required minLength={6} type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="Mínimo de 6 caracteres" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
+            <button disabled={authLoading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : authMode === "login" ? "Entrar no ADM" : "Criar conta"}</button>
           </form>
+          {authMode === "signup" && <p className="mt-4 text-xs leading-5 text-slate-500">Por segurança, criar a conta não concede automaticamente privilégios de ADM. A conta deve ser autorizada pelo administrador.</p>}
         </div>
       </main>
     );
