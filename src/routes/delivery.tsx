@@ -77,14 +77,8 @@ function DeliveryPage() {
         return;
       }
 
-      const registration = await navigator.serviceWorker.getRegistration("/") ?? await navigator.serviceWorker.ready;
-      await registration.update();
-      await registration.showNotification("Adson Fashion — teste", {
-        body: "As notificações estão a funcionar neste delivery.",
-        icon: "/adson-fashion-icon.svg",
-        badge: "/adson-fashion-icon.svg",
-        tag: "adson-fashion-notification-test",
-      });
+      if (!profile) throw new Error("Entre primeiro na área do delivery.");
+      await subscribeDeliveryPush(profile.id);
       setNotificationsEnabled(true);
     } catch (e) {
       setNotificationsEnabled(false);
@@ -137,7 +131,8 @@ function DeliveryPage() {
   useEffect(() => {
     if (!profile) return;
     if (typeof window !== "undefined" && "Notification" in window) {
-      setNotificationsEnabled(Notification.permission === "granted");
+      const granted = Notification.permission === "granted";
+      setNotificationsEnabled(granted && await hasDeliveryPushSubscription());
     }
     const timer = window.setInterval(() => { void loadOrders(true); }, 10000);
     return () => window.clearInterval(timer);
