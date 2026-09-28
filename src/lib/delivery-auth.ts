@@ -22,6 +22,14 @@ async function authRequest(path: string, options: RequestInit = {}) {
   if (!response.ok) throw new Error(data?.msg || data?.error_description || data?.message || "Não foi possível entrar.");
   return data;
 }
+export async function signUpDelivery(email: string, password: string) {
+  const data = await authRequest("/signup", { method: "POST", body: JSON.stringify({ email, password, data: { full_name: "Delivery Adson Fashion" } }) });
+  if (!data?.access_token) throw new Error("Conta criada. Confirme o email se o projeto exigir confirmação e depois entre.");
+  const session: DeliverySession = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at, user: data.user };
+  save(session);
+  return session;
+}
+
 export async function signInDelivery(email: string, password: string) {
   const data = await authRequest("/token?grant_type=password", { method: "POST", body: JSON.stringify({ email, password }) });
   const session: DeliverySession = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at, user: data.user };
