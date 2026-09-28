@@ -59,21 +59,19 @@ export async function subscribeDeliveryPush(deliveryId: string) {
   }
 
   const response = await fetch(
-    `${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/delivery_push_subscriptions?on_conflict=endpoint`,
+    `${SUPABASE_URL.replace(/\/$/, "")}/functions/v1/register-delivery-push`,
     {
       method: "POST",
       headers: {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${session.access_token}`,
         "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=minimal",
       },
       body: JSON.stringify({
         delivery_id: deliveryId,
         endpoint: json.endpoint,
         p256dh,
         auth,
-        updated_at: new Date().toISOString(),
       }),
     },
   );
@@ -81,7 +79,7 @@ export async function subscribeDeliveryPush(deliveryId: string) {
   if (!response.ok) {
     const details = await response.text().catch(() => "");
     throw new Error(
-      `Supabase recusou o registo do dispositivo (${response.status}). ${details || "Verifique o acesso do delivery."}`
+      `O servidor recusou o registo do Push (${response.status}). ${details || "Verifique a sessão do delivery."}`
     );
   }
 
