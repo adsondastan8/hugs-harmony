@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { listPublicProducts, type Product } from "../lib/supabase-data";
-type OrderItem = { productId: string; quantity: number };
+type OrderItem = { productId: string; quantity: number; color?: string; size?: string };
 const ORDER_KEY = "adson-fashion-cart";
 function readOrder(): OrderItem[] { try { return JSON.parse(localStorage.getItem(ORDER_KEY) ?? "[]") as OrderItem[]; } catch { return []; } }
 function writeOrder(items: OrderItem[]) { localStorage.setItem(ORDER_KEY, JSON.stringify(items)); }
@@ -9,9 +9,21 @@ export const Route = createFileRoute("/produtos")({ component: ProductsPage });
 function ProductsPage() {
   const navigate = useNavigate(); const [products, setProducts] = useState<Product[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [order, setOrder] = useState<OrderItem[]>([]);
   useEffect(() => { setOrder(readOrder()); let active = true; void listPublicProducts().then((data) => { if (active) setProducts(data); }).catch((e) => { if (active) setError(e instanceof Error ? e.message : "Não foi possível carregar os produtos."); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, []);
-  function selectProduct(product: Product) { const existing = order.find((item) => item.productId === product.id); const next = existing ? order.map((item) => item.productId === product.id ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) } : item) : [...order, { productId: product.id, quantity: 1 }]; setOrder(next); writeOrder(next); }
+  function selectProduct(product: Product) {
+  const current = order.find((item) => item.productId === product.id);
+  if ((product.colors?.length ?? 0) > 0 && !current?.color) return;
+  if ((product.sizes?.length ?? 0) > 0 && !current?.size) return;
+  const existing = order.find((item) => item.productId === product.id && item.color === current?.color && item.size === current?.size);
+  const next = existing ? order.map((item) => item === existing ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) } : item) : [...order, { productId: product.id, quantity: 1, color: current?.color, size: current?.size }];
+  setOrder(next); writeOrder(next);
+}
   function removeProduct(productId: string) { const next = order.filter((item) => item.productId !== productId); setOrder(next); writeOrder(next); }
-  function quantity(productId: string) { return order.find((item) => item.productId === productId)?.quantity ?? 0; }
+  function quantity(productId: string) { return order.filter((item) => item.productId === productId).reduce((sum, item) => sum + item.quantity, 0); }
+function updateVariant(productId: string, field: "color" | "size", value: string) {
+  const existing = order.find((item) => item.productId === productId);
+  const next = existing ? order.map((item) => item === existing ? { ...item, [field]: value || undefined } : item) : [...order, { productId, quantity: 0, [field]: value || undefined }];
+  setOrder(next); writeOrder(next);
+}
   const itemCount = order.reduce((sum, item) => sum + item.quantity, 0);
   const total = order.reduce((sum, item) => { const product = products.find((p) => p.id === item.productId); return sum + (product ? Number(product.price) * item.quantity : 0); }, 0);
   return (<main className="min-h-screen bg-[#faf7f1] pb-24 text-[#17130d]">
