@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   getDeliveryProfile,
@@ -42,6 +42,9 @@ function DeliveryPage() {
   const [error,setError]=useState("");
   const [mode,setMode]=useState<"login"|"signup">("login");
   const [activeOrder,setActiveOrder]=useState<string|null>(null);
+  const [notificationsEnabled,setNotificationsEnabled]=useState(false);
+  const knownOrderIds=useRef<Set<string>>(new Set());
+  const firstOrdersLoad=useRef(true);
 
   async function load() {
     setLoading(true); setError("");
@@ -55,16 +58,59 @@ function DeliveryPage() {
     finally { setLoading(false); }
   }
 
-  async function loadOrders() {
+  async function enableNotifications() {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      setError("Este dispositivo/navegador não suporta notificações.");
+      return;
+    }
+    const permission = Notification.permission === "granted"
+      ? "granted"
+      : await Notification.requestPermission();
+    setNotificationsEnabled(permission === "granted");
+    if (permission !== "granted") setError("Permita as notificações do navegador para receber avisos de novas encomendas.");
+  }
+
+  function notifyNewOrder(order: DeliveryOrder) {
+    if (typeof window === "undefined" || !("Notification" in window) || Notification.permission !== "granted") return;
+    const notification = new Notification("Nova encomenda — Adson Fashion", {
+      body: `Cliente: ${order.customer_name}\nTotal: ${money(Number(order.total))} MT\nEntrega: ${order.delivery_address}`,
+      tag: `adson-fashion-order-${order.id}`,
+      icon: "/adson-fashion-icon.svg",
+    });
+    notification.onclick = () => {
+      window.focus();
+      setActiveOrder(order.id);
+      notification.close();
+    };
+  }
+
+  async function loadOrders(showNotification = false) {
     setOrdersLoading(true);
     try {
       const next = await listDeliveryOrders();
+      const nextIds = new Set(next.map(order => order.id));
+      if (!firstOrdersLoad.current && showNotification) {
+        next
+          .filter(order => order.status === "pending" && !knownOrderIds.current.has(order.id))
+          .forEach(notifyNewOrder);
+      }
+      knownOrderIds.current = nextIds;
+      firstOrdersLoad.current = false;
       setOrders(next);
     } catch(e) { setError(e instanceof Error ? e.message : "Não foi possível carregar as encomendas."); }
     finally { setOrdersLoading(false); }
   }
 
   useEffect(()=>{ void load(); },[]);
+
+  useEffect(() => {
+    if (!profile) return;
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationsEnabled(Notification.permission === "granted");
+    }
+    const timer = window.setInterval(() => { void loadOrders(true); }, 10000);
+    return () => window.clearInterval(timer);
+  }, [profile]);
 
   async function login(e:FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
@@ -107,7 +153,7 @@ function DeliveryPage() {
     }
   }
 
-  async function logout() { await signOutDelivery(); setProfile(null); setOrders([]); setItems({}); }
+  async function logout() { await signOutDelivery(); setProfile(null); setOrders([]); setItems({}); knownOrderIds.current.clear(); firstOrdersLoad.current = true; }
 
   if (loading) return <main className="flex min-h-screen items-center justify-center bg-[#f5f1e8] text-[#171512]"><p className="font-bold">A carregar...</p></main>;
 
@@ -156,7 +202,12 @@ function DeliveryPage() {
               <section className="rounded-3xl border border-[#e7ded0] bg-[#fffcf7] p-5 shadow-sm sm:p-6">
                 <div className="flex items-end justify-between gap-3">
                   <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b8905a]">Trabalho</p><h2 className="mt-1 text-2xl font-black">As minhas encomendas</h2><p className="mt-1 text-sm text-[#756f67]">Aqui aparecem apenas as encomendas atribuídas a este delivery.</p></div>
-                  <button type="button" onClick={()=>void loadOrders()} className="rounded-xl border border-[#d9cebf] px-3 py-2 text-xs font-bold">Atualizar</button>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button type="button" onClick={()=>void enableNotifications()} className={`rounded-xl border px-3 py-2 text-xs font-bold ${notificationsEnabled ? "border-green-200 bg-green-50 text-green-700" : "border-[#d9cebf] bg-white"}`}>
+                      {notificationsEnabled ? "🔔 Notificações ativas" : "🔔 Ativar notificações"}
+                    </button>
+                    <button type="button" onClick={()=>void loadOrders(false)} className="rounded-xl border border-[#d9cebf] px-3 py-2 text-xs font-bold">Atualizar</button>
+                  </div>
                 </div>
                 <div className="mt-5 grid grid-cols-3 gap-3">
                   <div className="rounded-xl bg-[#faf7f1] p-3"><p className="text-xs text-[#756f67]">Novas</p><p className="mt-1 text-xl font-black">{orders.filter(o=>o.status==="pending").length}</p></div>
