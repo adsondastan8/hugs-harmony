@@ -19,6 +19,11 @@ export const Route = createFileRoute("/delivery")({ component: DeliveryPage });
 
 type Profile = { id:string; name:string; phone:string; login_email:string|null; is_online:boolean };
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+};
+
 function statusLabel(status: DeliveryOrder["status"]) {
   if (status === "pending") return "Nova";
   if (status === "confirmed") return "Aceite";
@@ -46,6 +51,8 @@ function DeliveryPage() {
   const [notificationsEnabled,setNotificationsEnabled]=useState(false);
   const [chromeNotificationsEnabled,setChromeNotificationsEnabled]=useState(false);
   const [pushRegistering,setPushRegistering]=useState(false);
+  const [installPrompt,setInstallPrompt]=useState<BeforeInstallPromptEvent|null>(null);
+  const [appInstalled,setAppInstalled]=useState(false);
   const [newOrderAlert,setNewOrderAlert]=useState<DeliveryOrder|null>(null);
   const knownOrderIds=useRef<Set<string>>(new Set());
   const firstOrdersLoad=useRef(true);
@@ -118,6 +125,42 @@ function DeliveryPage() {
   }
 
   useEffect(()=>{ void load(); },[]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const standalone = window.matchMedia("(display-mode: standalone)").matches;
+    const iosStandalone = "standalone" in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+    setAppInstalled(standalone || iosStandalone);
+
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const onAppInstalled = () => {
+      setAppInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onAppInstalled);
+    };
+  }, []);
+
+  async function installDeliveryApp() {
+    if (installPrompt) {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+      return;
+    }
+
+    setError("O Chrome ainda não disponibilizou a instalação automática. Abra o menu ⋮ do Chrome e escolha «Instalar app» enquanto estiver nesta Área do Delivery.");
+  }
 
   useEffect(() => {
     if (!profile) return;
@@ -201,6 +244,25 @@ function DeliveryPage() {
           </div>
           {profile && <button type="button" onClick={()=>void logout()} className="rounded-xl border border-[#d9cebf] bg-[#fffcf7] px-4 py-2 text-xs font-bold">Sair</button>}
         </header>
+
+        {!appInstalled && (
+          <section className="mb-5 rounded-3xl border border-[#d9cebf] bg-[#171512] p-5 text-white shadow-lg">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d7b77a]">App exclusivo</p>
+                <h2 className="mt-1 text-xl font-black">Instalar Adson Fashion Delivery</h2>
+                <p className="mt-1 text-sm leading-5 text-white/65">Este é um app separado da loja de produtos e do ADM.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void installDeliveryApp()}
+                className="shrink-0 rounded-xl bg-[#d7b77a] px-5 py-3 text-sm font-black text-[#171512]"
+              >
+                📲 Instalar app Delivery
+              </button>
+            </div>
+          </section>
+        )}
 
         {!profile ? (
           <div className="mx-auto max-w-md rounded-3xl border border-[#e7ded0] bg-[#fffcf7] p-6 shadow-xl sm:p-8">
