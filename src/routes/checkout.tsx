@@ -14,6 +14,11 @@ const NEAR_DELIVERY_FEE = 50;
 const MID_DELIVERY_FEE = 80;
 const NEAR_NEIGHBORHOODS = ["Popular", "Muchenga", "N'zinje", "Estação", "Cerâmica", "Chiuaula"];
 const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger"];
+const DELIVERY_CONTACTS = [
+  { id: "delivery-1", name: "Delivery 01", phone: "+258 880 889 762" },
+  { id: "delivery-2", name: "Delivery 02", phone: "+288 853 131 247" },
+  { id: "delivery-3", name: "Delivery 03", phone: "+258 864 311 529" },
+];
 
 function readCart(): CartItem[] {
   try { return JSON.parse(sessionStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
@@ -34,6 +39,7 @@ function CheckoutPage() {
   const [notes, setNotes] = useState("");
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("bairro");
   const [deliveryPlace, setDeliveryPlace] = useState<"bairro" | "ponto">("bairro");
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState("");
 
   const neighborhoodFee = NEAR_NEIGHBORHOODS.includes(neighborhood) ? NEAR_DELIVERY_FEE : MID_NEIGHBORHOODS.includes(neighborhood) ? MID_DELIVERY_FEE : MID_DELIVERY_FEE;
   const [error, setError] = useState("");
@@ -68,10 +74,13 @@ function CheckoutPage() {
     event.preventDefault();
     setError("");
     if (lines.length === 0) { setError("O seu pedido está vazio."); return; }
-    if (!name.trim() || !phone.trim() || (deliveryPlace === "bairro" && !neighborhood) || !address.trim() || !deliveryTime) {
-      setError("Preencha nome, telefone, bairro, endereço/referência e a hora desejada para receber a encomenda.");
+    if (!name.trim() || !phone.trim() || (deliveryPlace === "bairro" && !neighborhood) || !address.trim() || !deliveryTime || !selectedDeliveryId) {
+      setError("Preencha os dados da entrega e selecione um delivery disponível.");
       return;
     }
+
+    const selectedDelivery = DELIVERY_CONTACTS.find((delivery) => delivery.id === selectedDeliveryId);
+    if (!selectedDelivery) { setError("Selecione um delivery disponível."); return; }
 
     const message = [
       "🛍️ *ADSON FASHION*",
@@ -93,6 +102,10 @@ function CheckoutPage() {
       `Entrega: ${deliveryFee === 0 ? "Grátis" : `${deliveryFee.toLocaleString("pt-MZ")} MT`}`,
       `*TOTAL: ${total.toLocaleString("pt-MZ")} MT*`,
       "Pagamento: *na entrega*",
+      "",
+      "*🚚 DELIVERY SELECIONADO*",
+      `Delivery: ${selectedDelivery.name}`,
+      `Contacto: ${selectedDelivery.phone}`,
       "",
       "*📍 ENTREGA*",
       deliveryPlace === "bairro" ? `Bairro: ${neighborhood.trim()}` : "Local: Mercado / serviço / outro ponto",
@@ -216,6 +229,35 @@ function CheckoutPage() {
                       <button type="button" onClick={() => setDeliveryZone("bairro")} className={`rounded-xl border p-4 text-left transition ${deliveryZone === "bairro" ? "border-slate-950 bg-[#17130d] text-white shadow-lg" : "border-[#e5dccd] bg-[#fffdf9] hover:border-slate-400"}`}>
                         <span className="block text-sm font-black">Bairro</span><span className="mt-1 block text-xs text-white/70">A taxa é definida pelo local</span>
                       </button>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2 rounded-2xl border border-[#e5dccd] bg-[#fffdf9] p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#9a8f80]">🚚 Delivery</p>
+                        <h3 className="mt-1 text-lg font-black">Escolha quem vai fazer a sua entrega</h3>
+                        <p className="mt-1 text-xs leading-5 text-[#776e62]">Selecione um dos deliveries disponíveis. A sua escolha será enviada juntamente com a encomenda pelo WhatsApp.</p>
+                      </div>
+                      <span className="hidden rounded-full bg-[#f4efe6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#8b6b2f] sm:block">Disponível</span>
+                    </div>
+                    <div className="mt-4 grid gap-3">
+                      {DELIVERY_CONTACTS.map((delivery) => {
+                        const selected = selectedDeliveryId === delivery.id;
+                        return (
+                          <button
+                            key={delivery.id}
+                            type="button"
+                            onClick={() => setSelectedDeliveryId(delivery.id)}
+                            className={`flex items-center justify-between gap-4 rounded-xl border p-4 text-left transition ${selected ? "border-[#17130d] bg-[#17130d] text-white shadow-md" : "border-[#e5dccd] bg-[#fffdf9] hover:border-[#a88745]"}`}
+                          >
+                            <span>
+                              <span className="block text-sm font-black">{delivery.name}</span>
+                              <span className={`mt-1 block text-xs ${selected ? "text-white/70" : "text-[#776e62]"}`}>{delivery.phone}</span>
+                            </span>
+                            <span className={`flex h-7 w-7 items-center justify-center rounded-full border text-sm font-black ${selected ? "border-white bg-white text-[#17130d]" : "border-[#d8cdbb]"}`}>{selected ? "✓" : ""}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   <label className="text-sm font-bold sm:col-span-2">Observação <span className="font-normal text-[#9a8f80]">(opcional)</span><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Alguma referência ou pedido especial?" className={fieldClass} /></label>
