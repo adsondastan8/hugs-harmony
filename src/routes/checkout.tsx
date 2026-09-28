@@ -16,9 +16,9 @@ const NEAR_NEIGHBORHOODS = ["Popular", "Muchenga", "N'zinje", "Estação", "Cer�
 const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger"];
 
 function readCart(): CartItem[] {
-  try { return JSON.parse(localStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
+  try { return JSON.parse(sessionStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
 }
-function writeCart(items: CartItem[]) { localStorage.setItem(CART_KEY, JSON.stringify(items)); }
+function writeCart(items: CartItem[]) { sessionStorage.setItem(CART_KEY, JSON.stringify(items)); }
 
 export const Route = createFileRoute("/checkout")({ component: CheckoutPage });
 
@@ -114,7 +114,7 @@ function CheckoutPage() {
         }),
       });
 
-      localStorage.removeItem(CART_KEY);
+      sessionStorage.removeItem(CART_KEY);
       const messageWithOrder = `${message}\n\nNúmero da encomenda: #${orderId.slice(0, 8).toUpperCase()}`;
       window.location.href = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(messageWithOrder)}`;
     } catch (err) {
