@@ -103,7 +103,7 @@ function AdminDashboard() {
     setProductStock(String(product.stock));
     setProductImage(null);
     setProductError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function saveProduct(event: FormEvent<HTMLFormElement>) {
@@ -233,7 +233,7 @@ function AdminDashboard() {
         </header>
 
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div id="product-form" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
@@ -243,15 +243,27 @@ function AdminDashboard() {
                   {editingProductId ? "Atualizar produto" : "Adicionar produto"}
                 </h2>
               </div>
-              {editingProductId && (
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={resetProductForm}
-                  className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold"
+                  onClick={() => {
+                    resetProductForm();
+                    document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
                 >
-                  Cancelar edição
+                  + Adicionar produto
                 </button>
-              )}
+                {editingProductId && (
+                  <button
+                    type="button"
+                    onClick={resetProductForm}
+                    className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold"
+                  >
+                    Cancelar edição
+                  </button>
+                )}
+              </div>
             </div>
 
             {productError && (
@@ -394,7 +406,9 @@ function AdminDashboard() {
                       <div className="mt-5 flex gap-3">
                         <button
                           type="button"
-                          onClick={() => startEditing(product)}
+                          onClick={() => {
+                            startEditing(product);
+                          }}
                           className="flex-1 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
                         >
                           Editar
