@@ -312,31 +312,31 @@ function AdminDashboard() {
 
   if (checkingSession) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-900">
-        <p className="text-sm font-semibold text-slate-500">A verificar o acesso do ADM...</p>
+      <main className="flex min-h-screen items-center justify-center bg-[#F5F1E8] text-[#171512]">
+        <p className="text-sm font-semibold text-[#756F67]">A verificar o acesso do ADM...</p>
       </main>
     );
   }
 
   if (!authenticated) {
     return (
-      <main className="min-h-screen bg-slate-100 px-5 py-10 text-slate-900">
-        <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Adson Fashion</p>
+      <main className="min-h-screen bg-[#F5F1E8] px-5 py-10 text-[#171512]">
+        <div className="mx-auto max-w-md rounded-3xl border border-[#E7DED0] bg-[#FFFCF7] p-7 shadow-xl">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#756F67]">Adson Fashion</p>
           <h1 className="mt-3 text-3xl font-black">Área do ADM</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">Entre no painel ou crie uma conta de administrador para solicitar acesso.</p>
-          <div className="mt-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
-            <button type="button" onClick={() => { setAuthMode("login"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "login" ? "bg-white shadow-sm" : "text-slate-500"}`}>Entrar</button>
-            <button type="button" onClick={() => { setAuthMode("signup"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "signup" ? "bg-white shadow-sm" : "text-slate-500"}`}>Criar conta</button>
+          <p className="mt-3 text-sm leading-6 text-[#756F67]">Entre no painel ou crie uma conta de administrador para solicitar acesso.</p>
+          <div className="mt-6 grid grid-cols-2 rounded-xl bg-[#F5F1E8] p-1">
+            <button type="button" onClick={() => { setAuthMode("login"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "login" ? "bg-[#FFFCF7] shadow-sm" : "text-[#756F67]"}`}>Entrar</button>
+            <button type="button" onClick={() => { setAuthMode("signup"); setAuthError(""); }} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "signup" ? "bg-[#FFFCF7] shadow-sm" : "text-[#756F67]"}`}>Criar conta</button>
           </div>
           {authError && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
           <form onSubmit={submitAuth} className="mt-6 space-y-4">
-            {authMode === "signup" && <label className="grid gap-2 text-sm font-semibold">Nome<input required value={authName} onChange={(e) => setAuthName(e.target.value)} placeholder="Seu nome" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>}
-            <label className="grid gap-2 text-sm font-semibold">E-mail<input required type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="seu@email.com" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
-            <label className="grid gap-2 text-sm font-semibold">Palavra-passe<input required minLength={6} type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="Mínimo de 6 caracteres" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
-            <button disabled={authLoading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : authMode === "login" ? "Entrar no ADM" : "Criar conta"}</button>
+            {authMode === "signup" && <label className="grid gap-2 text-sm font-semibold">Nome<input required value={authName} onChange={(e) => setAuthName(e.target.value)} placeholder="Seu nome" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" /></label>}
+            <label className="grid gap-2 text-sm font-semibold">E-mail<input required type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="seu@email.com" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" /></label>
+            <label className="grid gap-2 text-sm font-semibold">Palavra-passe<input required minLength={6} type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="Mínimo de 6 caracteres" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" /></label>
+            <button disabled={authLoading} className="w-full rounded-xl bg-[#171512] px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : authMode === "login" ? "Entrar no ADM" : "Criar conta"}</button>
           </form>
-          {authMode === "signup" && <p className="mt-4 text-xs leading-5 text-slate-500">Por segurança, criar a conta não concede automaticamente privilégios de ADM. A conta deve ser autorizada pelo administrador.</p>}
+          {authMode === "signup" && <p className="mt-4 text-xs leading-5 text-[#756F67]">Por segurança, criar a conta não concede automaticamente privilégios de ADM. A conta deve ser autorizada pelo administrador.</p>}
         </div>
       </main>
     );
@@ -350,24 +350,24 @@ function AdminDashboard() {
       pending: "confirmed", confirmed: "sent", sent: "delivered",
     };
     return (
-      <main className="min-h-screen bg-slate-100 text-slate-900">
-        <header className="border-b border-slate-200 bg-slate-950 text-white">
+      <main className="min-h-screen bg-[#F5F1E8] text-[#171512]">
+        <header className="border-b border-[#E7DED0] bg-[#171512] text-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
-            <div><p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p><h1 className="mt-1 text-2xl font-black">Gestão de pedidos</h1></div>
-            <button type="button" onClick={() => setModule("dashboard")} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold">Voltar ao painel</button>
+            <div><p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p><h1 className="mt-1 text-2xl font-black">Gestão de pedidos</h1></div>
+            <button type="button" onClick={() => setModule("dashboard")} className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold">Voltar ao painel</button>
           </div>
         </header>
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
           {orderError && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{orderError}</div>}
-          {orderLoading ? <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">A carregar pedidos...</div> : orders.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500"><p className="text-4xl">🛒</p><p className="mt-3 font-bold">Ainda não há pedidos.</p><p className="mt-1 text-sm">Os pedidos aparecerão aqui quando o checkout do cliente estiver ligado.</p></div> : (
+          {orderLoading ? <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-8 text-center text-[#756F67]">A carregar pedidos...</div> : orders.length === 0 ? <div className="rounded-2xl border border-dashed border-[#D9CEBF] bg-[#FFFCF7] p-10 text-center text-[#756F67]"><p className="text-4xl">🛒</p><p className="mt-3 font-bold">Ainda não há pedidos.</p><p className="mt-1 text-sm">Os pedidos aparecerão aqui quando o checkout do cliente estiver ligado.</p></div> : (
             <div className="grid gap-5 lg:grid-cols-2">{orders.map((order) => (
-              <article key={order.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Pedido #{order.id.slice(0,8).toUpperCase()}</p><h2 className="mt-1 text-xl font-black">{order.customer_name}</h2><p className="text-sm text-slate-500">{order.customer_phone}</p></div><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">{statusLabel[order.status]}</span></div>
+              <article key={order.id} className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-sm">
+                <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Pedido #{order.id.slice(0,8).toUpperCase()}</p><h2 className="mt-1 text-xl font-black">{order.customer_name}</h2><p className="text-sm text-[#756F67]">{order.customer_phone}</p></div><span className="rounded-full bg-[#F5F1E8] px-3 py-1 text-xs font-bold">{statusLabel[order.status]}</span></div>
                 <div className="mt-5 space-y-2 text-sm"><p><strong>Entrega:</strong> {order.delivery_address}</p><p><strong>Total:</strong> {Number(order.total).toLocaleString("pt-MZ")} MT</p>{order.notes && <p><strong>Observação:</strong> {order.notes}</p>}</div>
                 <button type="button" onClick={async () => { const items = await listOrderItems(order.id); setOrderItems((current) => ({...current, [order.id]: items})); }} className="mt-5 text-sm font-bold underline">Ver produtos do pedido</button>
-                {orderItems[order.id] && <div className="mt-3 rounded-xl bg-slate-50 p-4 text-sm">{orderItems[order.id].map((item) => <p key={item.id}>• {item.product_name} × {item.quantity}{item.selected_color ? ` · Cor: ${item.selected_color}` : ""}{item.selected_size ? ` · Tamanho: ${item.selected_size}` : ""} — {Number(item.subtotal).toLocaleString("pt-MZ")} MT</p>)}</div>}
+                {orderItems[order.id] && <div className="mt-3 rounded-xl bg-[#FAF7F1] p-4 text-sm">{orderItems[order.id].map((item) => <p key={item.id}>• {item.product_name} × {item.quantity}{item.selected_color ? ` · Cor: ${item.selected_color}` : ""}{item.selected_size ? ` · Tamanho: ${item.selected_size}` : ""} — {Number(item.subtotal).toLocaleString("pt-MZ")} MT</p>)}</div>}
                 <div className="mt-5 flex flex-wrap gap-3">
-                  {nextStatus[order.status] && <button type="button" onClick={async () => { const updated = await updateOrderStatus(order.id, nextStatus[order.status]!); setOrders((items) => items.map((item) => item.id === order.id ? updated : item)); }} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">Marcar como {statusLabel[nextStatus[order.status]!]}</button>}
+                  {nextStatus[order.status] && <button type="button" onClick={async () => { const updated = await updateOrderStatus(order.id, nextStatus[order.status]!); setOrders((items) => items.map((item) => item.id === order.id ? updated : item)); }} className="rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white">Marcar como {statusLabel[nextStatus[order.status]!]}</button>}
                   {order.customer_phone && <a href={buildOrderWhatsAppUrl(order, orderItems[order.id] ?? [])} target="_blank" rel="noreferrer" className="rounded-xl border border-green-200 px-4 py-2.5 text-sm font-bold text-green-700">WhatsApp</a>}
                 </div>
               </article>
@@ -403,11 +403,11 @@ function AdminDashboard() {
 
   if (module === "produtos") {
     return (
-      <main className="min-h-screen bg-slate-100 text-slate-900">
-        <header className="border-b border-slate-200 bg-slate-950 text-white">
+      <main className="min-h-screen bg-[#F5F1E8] text-[#171512]">
+        <header className="border-b border-[#E7DED0] bg-[#171512] text-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Adson Fashion</p>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p>
               <h1 className="mt-1 text-2xl font-black">Gestão de produtos</h1>
             </div>
             <button
@@ -416,7 +416,7 @@ function AdminDashboard() {
                 resetProductForm();
                 setModule("dashboard");
               }}
-              className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold"
+              className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold"
             >
               Voltar ao painel
             </button>
@@ -424,10 +424,10 @@ function AdminDashboard() {
         </header>
 
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
-          <div id="product-form" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div id="product-form" className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-6 shadow-sm">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#756F67]">
                   {editingProductId ? "Editar produto" : "Novo produto"}
                 </p>
                 <h2 className="mt-1 text-3xl font-black">
@@ -441,7 +441,7 @@ function AdminDashboard() {
                     resetProductForm();
                     document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
+                  className="rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white"
                 >
                   + Adicionar produto
                 </button>
@@ -449,7 +449,7 @@ function AdminDashboard() {
                   <button
                     type="button"
                     onClick={resetProductForm}
-                    className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold"
+                    className="rounded-xl border border-[#D9CEBF] px-4 py-2.5 text-sm font-bold"
                   >
                     Cancelar edição
                   </button>
@@ -472,7 +472,7 @@ function AdminDashboard() {
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     placeholder="Nome do produto"
-                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
                   />
                 </label>
 
@@ -481,7 +481,7 @@ function AdminDashboard() {
                   <select
                     value={productCategory}
                     onChange={(e) => setProductCategory(e.target.value)}
-                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 font-normal"
+                    className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 font-normal"
                   >
                     <option>Roupa</option>
                     <option>Calçado</option>
@@ -498,7 +498,7 @@ function AdminDashboard() {
                     onChange={(e) => setProductPrice(e.target.value)}
                     inputMode="decimal"
                     placeholder="Ex.: 1999"
-                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
                   />
                 </label>
 
@@ -510,20 +510,20 @@ function AdminDashboard() {
                     onChange={(e) => setProductStock(e.target.value)}
                     inputMode="numeric"
                     placeholder="Quantidade disponível"
-                    className="rounded-xl border border-slate-300 px-4 py-3 font-normal"
+                    className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal"
                   />
                 </label>
 
                 <label className="grid gap-2 text-sm font-semibold">
                   Cores disponíveis
-                  <input value={productColors} onChange={(e) => setProductColors(e.target.value)} placeholder="Ex.: Preto, Branco, Azul, Vermelho" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" />
-                  <span className="text-xs font-normal text-slate-500">Separe as cores por vírgulas.</span>
+                  <input value={productColors} onChange={(e) => setProductColors(e.target.value)} placeholder="Ex.: Preto, Branco, Azul, Vermelho" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" />
+                  <span className="text-xs font-normal text-[#756F67]">Separe as cores por vírgulas.</span>
                 </label>
 
                 <label className="grid gap-2 text-sm font-semibold">
                   Tamanhos disponíveis
-                  <input value={productSizes} onChange={(e) => setProductSizes(e.target.value)} placeholder="Ex.: S, M, L, XL, XXL" className="rounded-xl border border-slate-300 px-4 py-3 font-normal" />
-                  <span className="text-xs font-normal text-slate-500">Separe os tamanhos por vírgulas.</span>
+                  <input value={productSizes} onChange={(e) => setProductSizes(e.target.value)} placeholder="Ex.: S, M, L, XL, XXL" className="rounded-xl border border-[#D9CEBF] px-4 py-3 font-normal" />
+                  <span className="text-xs font-normal text-[#756F67]">Separe os tamanhos por vírgulas.</span>
                 </label>
 
                 <label className="grid gap-2 text-sm font-semibold md:col-span-2">
@@ -532,9 +532,9 @@ function AdminDashboard() {
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     onChange={(e) => setProductImage(e.target.files?.[0] ?? null)}
-                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-normal"
+                    className="rounded-xl border border-[#D9CEBF] bg-[#FFFCF7] px-4 py-3 text-sm font-normal"
                   />
-                  <span className="text-xs font-normal text-slate-500">
+                  <span className="text-xs font-normal text-[#756F67]">
                     JPG, PNG, WEBP ou GIF — máximo 6 MB.
                     {productImage ? ` Selecionada: ${productImage.name}` : ""}
                   </span>
@@ -544,7 +544,7 @@ function AdminDashboard() {
               <button
                 type="submit"
                 disabled={productSaving}
-                className="mt-6 rounded-xl bg-slate-950 px-6 py-3 font-bold text-white disabled:opacity-60"
+                className="mt-6 rounded-xl bg-[#171512] px-6 py-3 font-bold text-white disabled:opacity-60"
               >
                 {productSaving
                   ? "A guardar..."
@@ -558,25 +558,25 @@ function AdminDashboard() {
           <div className="mt-8">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-black">Produtos cadastrados</h2>
-              <span className="rounded-full bg-slate-200 px-3 py-1 text-sm font-bold">
+              <span className="rounded-full bg-[#EEE8DE] px-3 py-1 text-sm font-bold">
                 {products.length}
               </span>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {productLoading ? (
-                <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 sm:col-span-2 lg:col-span-3">
+                <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-8 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
                   A carregar produtos...
                 </div>
               ) : products.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 sm:col-span-2 lg:col-span-3">
+                <div className="rounded-2xl border border-dashed border-[#D9CEBF] bg-[#FFFCF7] p-8 text-center text-[#756F67] sm:col-span-2 lg:col-span-3">
                   Ainda não há produtos.
                 </div>
               ) : (
                 products.map((product) => (
                   <article
                     key={product.id}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                    className="overflow-hidden rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] shadow-sm"
                   >
                     {product.image_url ? (
                       <img
@@ -585,7 +585,7 @@ function AdminDashboard() {
                         className="h-52 w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-52 items-center justify-center bg-slate-100 text-5xl">
+                      <div className="flex h-52 items-center justify-center bg-[#F5F1E8] text-5xl">
                         🛍️
                       </div>
                     )}
@@ -594,15 +594,15 @@ function AdminDashboard() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="text-lg font-black">{product.name}</h3>
-                          <p className="mt-1 text-sm text-slate-500">{product.category}</p>
+                          <p className="mt-1 text-sm text-[#756F67]">{product.category}</p>
                         </div>
                         <p className="text-lg font-black">
                           {Number(product.price).toLocaleString("pt-MZ")} MT
                         </p>
                       </div>
 
-                      <div className="mt-4 rounded-xl bg-slate-100 px-4 py-3">
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Estoque</p>
+                      <div className="mt-4 rounded-xl bg-[#F5F1E8] px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[#756F67]">Estoque</p>
                         <p className="mt-1 text-xl font-black">{product.stock} unidades</p>
                       </div>
 
@@ -612,7 +612,7 @@ function AdminDashboard() {
                           onClick={() => {
                             startEditing(product);
                           }}
-                          className="flex-1 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
+                          className="flex-1 rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white"
                         >
                           Editar
                         </button>
@@ -665,14 +665,14 @@ function AdminDashboard() {
                 <button type="button" aria-label="Fechar menu ADM" onClick={() => setAdminMenuOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-xl">×</button>
               </div>
               <nav className="mt-6 grid gap-2">
-                <button type="button" onClick={() => { setModule("dashboard"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
-                <button type="button" onClick={() => { setModule("produtos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
-                <button type="button" onClick={() => { setModule("pedidos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
-                <button type="button" onClick={() => { setModule("clientes"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">👥 Clientes</button>
+                <button type="button" onClick={() => { setModule("dashboard"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl bg-[#FFFCF7]/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
+                <button type="button" onClick={() => { setModule("produtos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-[#FFFCF7]/10">📦 Produtos</button>
+                <button type="button" onClick={() => { setModule("pedidos"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-[#FFFCF7]/10">🛒 Encomendas</button>
+                <button type="button" onClick={() => { setModule("clientes"); setAdminMenuOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-[#FFFCF7]/10">👥 Clientes</button>
                 <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/35">📈 Estatísticas <span className="ml-auto text-[9px] uppercase">Em breve</span></button>
               </nav>
               <div className="mt-auto border-t border-white/10 pt-5">
-                <button type="button" onClick={requestLogout} className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
+                <button type="button" onClick={requestLogout} className="w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-[#FFFCF7]/10">🚪 Sair</button>
               </div>
             </aside>
           </div>
