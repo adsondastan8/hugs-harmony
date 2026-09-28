@@ -124,10 +124,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
+    const isDeliveryApp = window.location.pathname.startsWith("/delivery");
+    const manifestHref = isDeliveryApp ? "/delivery.webmanifest" : "/manifest.webmanifest";
+
+    let manifestLink = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    if (!manifestLink) {
+      manifestLink = document.createElement("link");
+      manifestLink.rel = "manifest";
+      document.head.appendChild(manifestLink);
+    }
+    manifestLink.href = manifestHref;
+    document.title = isDeliveryApp ? "Adson Fashion Delivery" : "Adson Fashion";
+
     if (!("serviceWorker" in navigator)) return;
 
     void navigator.serviceWorker
-      .register("/sw.js?v=4", { scope: "/" })
+      .register("/sw.js?v=5", { scope: "/" })
       .then((registration) => registration.update())
       .catch((error) => {
         console.error("Não foi possível registar o Service Worker:", error);
