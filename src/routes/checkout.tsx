@@ -23,6 +23,7 @@ function CheckoutPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
   const [address, setAddress] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -55,8 +56,8 @@ function CheckoutPage() {
     event.preventDefault();
     setError("");
     if (lines.length === 0) { setError("O seu pedido está vazio."); return; }
-    if (!name.trim() || !phone.trim() || !address.trim() || !deliveryTime) {
-      setError("Preencha nome, telefone, endereço e a hora desejada para receber a encomenda.");
+    if (!name.trim() || !phone.trim() || !neighborhood || !address.trim() || !deliveryTime) {
+      setError("Preencha nome, telefone, bairro, endereço/referência e a hora desejada para receber a encomenda.");
       return;
     }
 
@@ -74,7 +75,8 @@ function CheckoutPage() {
       "",
       `Nome: ${name.trim()}`,
       `Telefone: ${phone.trim()}`,
-      `Endereço: ${address.trim()}`,
+      `Bairro: ${neighborhood.trim()}`,
+      `Endereço / referência: ${address.trim()}`,
       `Hora desejada para receber: ${deliveryTime}`,
       notes.trim() ? `Observação: ${notes.trim()}` : "",
     ].filter(Boolean).join("\n");
@@ -83,7 +85,7 @@ function CheckoutPage() {
     window.location.href = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   }
 
-  const fieldClass = "mt-2 w-full rounded-xl border border-[#e5dccd] bg-[#fffdf9] px-4 py-3.5 text-[15px] outline-none transition placeholder:text-[#9a8f80] focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10";
+  const fieldClass = "mt-2 w-full rounded-xl border border-[#e5dccd] bg-[#fffdf9] px-4 py-3.5 text-[15px] outline-none transition placeholder:text-[#9a8f80] focus:border-[#a88745] focus:ring-2 focus:ring-slate-900/10";
   const sectionClass = "rounded-2xl border border-[#e5dccd] bg-[#fffdf9] shadow-sm";
 
   return (
@@ -151,7 +153,8 @@ function CheckoutPage() {
                   <label className="text-sm font-bold sm:col-span-2">Nome completo<input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Adson Dastan" className={fieldClass} /></label>
                   <label className="text-sm font-bold">Telefone<input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+258 84 000 0000" className={fieldClass} /></label>
                   <label className="text-sm font-bold">Hora desejada<input required type="time" value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} className={fieldClass} /></label>
-                  <label className="text-sm font-bold sm:col-span-2">Endereço de entrega<textarea required value={address} onChange={(e) => setAddress(e.target.value)} rows={3} placeholder="Bairro, rua, referência..." className={fieldClass} /></label>
+                  <label className="text-sm font-bold">Bairro<select required value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className={fieldClass}><option value="">Selecione o bairro</option><option>Sanjala</option><option>N'zinje</option><option>Muchenga</option><option>Popular</option><option>Namacula</option><option>Chiulugo</option><option>Chiuaula / Luchiringo</option><option>Estação</option><option>Cerâmica</option><option>Massenger</option><option>Assumane</option><option>Sambula</option><option>Lulimile</option><option>Nomba</option><option>23 de Setembro</option><option>Mitava</option><option>Utumuile</option><option>Ntoto</option><option>Naluila</option></select></label>
+                  <label className="text-sm font-bold">Endereço / referência<input required value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua, casa, ponto de referência..." className={fieldClass} /></label>
                   <div className="sm:col-span-2">
                     <p className="text-sm font-bold">Zona de entrega</p>
                     <div className="mt-2 grid gap-3 sm:grid-cols-2">
