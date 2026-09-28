@@ -59,15 +59,38 @@ function DeliveryPage() {
   }
 
   async function enableNotifications() {
-    if (typeof window === "undefined" || !("Notification" in window)) {
-      setError("Este dispositivo/navegador não suporta notificações.");
+    setError("");
+    if (typeof window === "undefined" || !("Notification" in window) || !("serviceWorker" in navigator)) {
+      setError("Este dispositivo/navegador não suporta notificações web.");
       return;
     }
-    const permission = Notification.permission === "granted"
-      ? "granted"
-      : await Notification.requestPermission();
-    setNotificationsEnabled(permission === "granted");
-    if (permission !== "granted") setError("Permita as notificações do navegador para receber avisos de novas encomendas.");
+
+    try {
+      const permission = Notification.permission === "granted"
+        ? "granted"
+        : await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        setNotificationsEnabled(false);
+        setError(`As notificações estão bloqueadas. Permissão atual: ${permission}.`);
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.getRegistration("/") ?? await navigator.serviceWorker.ready;
+      await registration.update();
+      await registration.showNotification("Adson Fashion — teste", {
+        body: "As notificações estão a funcionar neste delivery.",
+        icon: "/adson-fashion-icon.svg",
+        badge: "/adson-fashion-icon.svg",
+        tag: "adson-fashion-notification-test",
+      });
+      setNotificationsEnabled(true);
+    } catch (e) {
+      setNotificationsEnabled(false);
+      setError(e instanceof Error
+        ? `O Android recusou a notificação: ${e.message}`
+        : "O Android recusou a notificação. Verifique as permissões do site.");
+    }
   }
 
   async function notifyNewOrder(order: DeliveryOrder) {
