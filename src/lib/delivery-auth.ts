@@ -63,3 +63,67 @@ export async function setDeliveryOnline(id: string, isOnline: boolean) {
   const rows = await response.json() as Array<{id:string;name:string;phone:string;login_email:string|null;is_online:boolean}>;
   return rows[0] ?? null;
 }
+
+
+export type DeliveryOrder = {
+  id: string;
+  customer_name: string;
+  customer_phone: string;
+  delivery_address: string;
+  status: "pending" | "confirmed" | "sent" | "delivered" | "cancelled";
+  total: number;
+  notes: string | null;
+  created_at: string;
+  confirmed_at: string | null;
+  sent_at: string | null;
+  delivered_at: string | null;
+  assigned_delivery_id: string | null;
+};
+
+export type DeliveryOrderItem = {
+  id: string;
+  order_id: string;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  subtotal: number;
+  selected_color: string | null;
+  selected_size: string | null;
+};
+
+async function deliveryRequest(path: string, options: RequestInit = {}) {
+  const session = getDeliverySession();
+  if (!session) throw new Error("Sessão de delivery não encontrada.");
+  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || data?.hint || data?.details || "Não foi possível carregar os dados.");
+  return data;
+}
+
+export async function listDeliveryOrders() {
+  const orders = await deliveryRequest("/orders?select=*&order=created_at.desc") as DeliveryOrder[];
+  return orders;
+}
+
+export async function listDeliveryOrderItems(orderId: string) {
+  return await deliveryRequest(`/order_items?select=*&order_id=eq.${encodeURIComponent(orderId)}&order=id.asc`) as DeliveryOrderItem[];
+}
+
+export async function updateDeliveryOrderStatus(id: string, status: DeliveryOrder["status"]) {
+  const now = new Date().toISOString();
+  const timestamps = status === "confirmed" ? { confirmed_at: now } : status === "sent" ? { sent_at: now } : status === "delivered" ? { delivered_at: now } : {};
+  const rows = await deliveryRequest(`/orders?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({ status, ...timestamps }),
+  }) as DeliveryOrder[];
+  return rows[0] ?? null;
+}
