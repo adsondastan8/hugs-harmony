@@ -9,6 +9,7 @@ import {
   type Product,
 } from "../lib/supabase-data";
 import { getCurrentUser, signIn, signOut } from "../lib/supabase-auth";
+import { listCustomers, type Customer } from "../lib/supabase-customers";
 import {
   buildOrderWhatsAppUrl,
   listOrderItems,
@@ -40,7 +41,7 @@ function AdminDashboard() {
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [module, setModule] = useState<"dashboard" | "produtos" | "pedidos">("dashboard");
+  const [module, setModule] = useState<"dashboard" | "produtos" | "pedidos" | "clientes">("dashboard");
   const [products, setProducts] = useState<Product[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [productSaving, setProductSaving] = useState(false);
@@ -55,6 +56,9 @@ function AdminDashboard() {
   const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [customerLoading, setCustomerLoading] = useState(false);
+  const [customerError, setCustomerError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -138,6 +142,18 @@ function AdminDashboard() {
     return () => {
       active = false;
     };
+  }, [module]);
+
+  useEffect(() => {
+    if (module !== "clientes") return;
+    let active = true;
+    setCustomerError("");
+    setCustomerLoading(true);
+    void listCustomers()
+      .then((data) => { if (active) setCustomers(data); })
+      .catch((e) => { if (active) setCustomerError(e instanceof Error ? e.message : "Não foi possível carregar os clientes."); })
+      .finally(() => { if (active) setCustomerLoading(false); });
+    return () => { active = false; };
   }, [module]);
 
   function resetProductForm() {
@@ -312,6 +328,29 @@ function AdminDashboard() {
                 </div>
               </article>
             ))}</div>
+          )}
+        </section>
+      </main>
+    );
+  }
+
+  if (module === "clientes") {
+    return (
+      <main className="min-h-screen bg-[#F5F1E8] text-[#171512]">
+        <header className="border-b border-[#E7DED0] bg-[#171512] text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
+            <div><p className="text-xs font-bold uppercase tracking-[0.3em] text-[#B8905A]">Adson Fashion</p><h1 className="mt-1 text-2xl font-black">Gestão de clientes</h1></div>
+            <button type="button" onClick={() => setModule("dashboard")} className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold">Voltar ao painel</button>
+          </div>
+        </header>
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+          {customerError && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{customerError}</div>}
+          <div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#B8905A]">Base de clientes</p><h2 className="mt-2 text-3xl font-black">Clientes</h2><p className="mt-2 text-sm text-[#756F67]">Contactos e dados de entrega guardados pelos clientes.</p></div><span className="rounded-full bg-[#171512] px-4 py-2 text-sm font-bold text-white">{customers.length}</span></div>
+          {customerLoading ? <div className="rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] p-10 text-center text-[#756F67]">A carregar clientes...</div> : customers.length === 0 ? <div className="rounded-2xl border border-dashed border-[#D9CEBF] bg-[#FFFCF7] p-10 text-center text-[#756F67]"><p className="text-4xl">👥</p><p className="mt-3 font-bold">Ainda não há clientes registados.</p></div> : (
+            <div className="overflow-hidden rounded-2xl border border-[#E7DED0] bg-[#FFFCF7] shadow-sm">
+              <div className="hidden grid-cols-4 gap-4 border-b border-[#E7DED0] bg-[#EEE8DE] px-5 py-4 text-xs font-bold uppercase tracking-wider text-[#756F67] md:grid"><span>Cliente</span><span>Telefone</span><span>Local de entrega</span><span>Registado</span></div>
+              {customers.map((customer) => <article key={customer.id} className="grid gap-3 border-b border-[#E7DED0] px-5 py-5 last:border-0 md:grid-cols-4 md:items-center md:gap-4"><div><p className="font-black">{customer.name || "Sem nome"}</p><p className="text-xs text-[#756F67]">{customer.id}</p></div><p className="text-sm font-semibold">{customer.phone || "—"}</p><p className="text-sm text-[#756F67]">{customer.delivery_address || "—"}</p><p className="text-sm text-[#756F67]">{new Date(customer.created_at).toLocaleDateString("pt-MZ")}</p></article>)}
+            </div>
           )}
         </section>
       </main>
@@ -552,7 +591,7 @@ function AdminDashboard() {
               <button type="button" onClick={() => setModule("dashboard")} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-bold">📊 Dashboard</button>
               <button type="button" onClick={() => setModule("produtos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">📦 Produtos</button>
               <button type="button" onClick={() => setModule("pedidos")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">🛒 Encomendas</button>
-              <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">👥 Clientes <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
+              <button type="button" onClick={() => setModule("clientes")} className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold hover:bg-white/10">👥 Clientes</button>
               <button type="button" disabled className="flex cursor-not-allowed items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-white/40">📈 Estatísticas <span className="ml-auto text-[10px] uppercase">Em breve</span></button>
             </nav>
             <button type="button" onClick={handleLogout} className="mt-8 w-full rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/10">🚪 Sair</button>
@@ -603,7 +642,9 @@ function AdminDashboard() {
                     <div className="text-3xl">{icon}</div>
                     <h4 className="mt-5 text-xl font-bold">{title}</h4>
                     <p className="mt-2 text-sm leading-6 text-[#756F67]">{description}</p>
-                    {action ? (
+                    {title === "Clientes" ? (
+                      <button type="button" onClick={() => setModule("clientes")} className="mt-5 rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90">Abrir módulo</button>
+                    ) : action ? (
                       <button type="button" onClick={() => setModule(action === "pedidos" ? "pedidos" : "produtos")} className="mt-5 rounded-xl bg-[#171512] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90">Abrir módulo</button>
                     ) : (
                       <span className="mt-5 inline-flex rounded-xl bg-[#EEE8DE] px-4 py-2.5 text-sm font-bold text-[#756F67]">Em breve</span>
