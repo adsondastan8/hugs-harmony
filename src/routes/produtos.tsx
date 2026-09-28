@@ -120,11 +120,29 @@ function ProductsPage() {
     <main className="min-h-screen bg-[#faf7f1] pb-24 text-[#17130d]">
       <header className="sticky top-0 z-20 border-b border-[#e5dccd] bg-[#fffdf9]/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <button type="button" onClick={() => navigate({ to: "/" })} className="text-left">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/" })}
+            aria-label="Voltar para a página inicial"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e5dccd] bg-[#fffdf9] text-xl font-black shadow-sm transition hover:bg-[#f4efe6]"
+          >
+            ←
+          </button>
+
+          <div className="ml-auto text-right">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#776e62]">Adson Fashion</p>
             <p className="text-base font-black">Produtos</p>
-          </button>
-          {itemCount > 0 && <button type="button" onClick={() => navigate({ to: "/checkout" })} className="rounded-lg bg-[#17130d] px-3 py-2 text-xs font-bold text-white">Encomenda · {itemCount}</button>}
+          </div>
+
+          {itemCount > 0 && (
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/checkout" })}
+              className="rounded-lg bg-[#17130d] px-3 py-2 text-xs font-bold text-white"
+            >
+              Encomenda · {itemCount}
+            </button>
+          )}
         </div>
       </header>
 
