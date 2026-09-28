@@ -14,12 +14,6 @@ const NEAR_DELIVERY_FEE = 50;
 const MID_DELIVERY_FEE = 80;
 const NEAR_NEIGHBORHOODS = ["Popular", "Muchenga", "N'zinje", "Estação", "Cerâmica", "Chiuaula"];
 const MID_NEIGHBORHOODS = ["Namacula", "Sanjala", "Chiulugo", "23 de Setembro", "Massenger"];
-const DELIVERY_CONTACTS = [
-  { id: "delivery-1", name: "Delivery 01", phone: "+258 880 889 762" },
-  { id: "delivery-2", name: "Delivery 02", phone: "+288 853 131 247" },
-  { id: "delivery-3", name: "Delivery 03", phone: "+258 864 311 529" },
-];
-
 function readCart(): CartItem[] {
   try { return JSON.parse(sessionStorage.getItem(CART_KEY) ?? "[]") as CartItem[]; } catch { return []; }
 }
