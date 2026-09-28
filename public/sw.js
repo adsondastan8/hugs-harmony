@@ -1,4 +1,4 @@
-const CACHE_NAME = "adson-fashion-pwa-v2";
+const CACHE_NAME = "adson-fashion-pwa-v3";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/adson-fashion-icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -23,6 +23,32 @@ self.addEventListener("fetch", (event) => {
       caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
       return response;
     }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
+  );
+});
+
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data ? event.data.text() : "" };
+  }
+
+  const title = payload.title || "Nova encomenda — Adson Fashion";
+  const body = payload.body || "Tem uma nova encomenda atribuída a si.";
+  const orderId = payload.orderId || null;
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/adson-fashion-icon.svg",
+      badge: "/adson-fashion-icon.svg",
+      tag: orderId ? `adson-fashion-order-${orderId}` : "adson-fashion-order",
+      renotify: true,
+      requireInteraction: true,
+      data: { orderId, url: payload.url || "/delivery" },
+    })
   );
 });
 
