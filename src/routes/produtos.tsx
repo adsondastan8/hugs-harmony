@@ -35,9 +35,12 @@ function ProductsPage() {
     if ((product.colors?.length ?? 0) > 0 && !current?.color) return;
     if ((product.sizes?.length ?? 0) > 0 && !current?.size) return;
     const existing = order.find((item) => item.productId === product.id && item.color === current?.color && item.size === current?.size);
+    const newItem: OrderItem = { productId: product.id, quantity: 1 };
+    if (current?.color) newItem.color = current.color;
+    if (current?.size) newItem.size = current.size;
     const next = existing
       ? order.map((item) => item === existing ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) } : item)
-      : [...order, { productId: product.id, quantity: 1, color: current?.color, size: current?.size }];
+      : [...order, newItem];
     setOrder(next);
     writeOrder(next);
     setSelectedProduct(null);
@@ -55,8 +58,22 @@ function ProductsPage() {
   function updateVariant(productId: string, field: "color" | "size", value: string) {
     const existing = order.find((item) => item.productId === productId);
     const next = existing
-      ? order.map((item) => item === existing ? { ...item, [field]: value || undefined } : item)
-      : [...order, { productId, quantity: 0, [field]: value || undefined }];
+      ? order.map((item) => {
+          if (item !== existing) return item;
+          const updated = { ...item };
+          if (field === "color") {
+            if (value) updated.color = value; else delete updated.color;
+          } else {
+            if (value) updated.size = value; else delete updated.size;
+          }
+          return updated;
+        })
+      : (() => {
+          const item: OrderItem = { productId, quantity: 0 };
+          if (field === "color" && value) item.color = value;
+          if (field === "size" && value) item.size = value;
+          return [...order, item];
+        })();
     setOrder(next); writeOrder(next);
   }
 
