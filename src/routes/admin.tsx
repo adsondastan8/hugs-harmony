@@ -8,7 +8,7 @@ import {
   uploadProductImage,
   type Product,
 } from "../lib/supabase-data";
-import { getCurrentUser, signIn, signOut, signUp } from "../lib/supabase-auth";
+import { getCurrentUser, signIn, signOut } from "../lib/supabase-auth";
 import {
   buildOrderWhatsAppUrl,
   listOrderItems,
@@ -35,11 +35,9 @@ function AdminDashboard() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const authMode = "login" as const;
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
-  const [authConfirmation, setAuthConfirmation] = useState("");
-  const [authName, setAuthName] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [module, setModule] = useState<"dashboard" | "produtos" | "pedidos">("dashboard");
@@ -85,26 +83,9 @@ function AdminDashboard() {
   async function submitAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setAuthError("");
-    if (authMode === "signup" && authPassword !== authConfirmation) {
-      setAuthError("As palavras-passe não coincidem.");
-      return;
-    }
-    if (authMode === "signup" && !authName.trim()) {
-      setAuthError("Informe o nome do administrador.");
-      return;
-    }
     setAuthLoading(true);
     try {
-      if (authMode === "signup") {
-        const result = await signUp(authEmail.trim(), authPassword, authName.trim());
-        if (!result.session) {
-          setAuthError("Conta criada. Confirme o e-mail no Supabase e depois entre.");
-          setAuthMode("login");
-          return;
-        }
-      } else {
-        await signIn(authEmail.trim(), authPassword);
-      }
+      await signIn(authEmail.trim(), authPassword);
       const user = await getCurrentUser();
       if (!user) throw new Error("Não foi possível iniciar a sessão.");
       setAuthenticated(true);
@@ -290,17 +271,11 @@ function AdminDashboard() {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Adson Fashion</p>
           <h1 className="mt-3 text-3xl font-black">Área do ADM</h1>
           <p className="mt-3 text-sm leading-6 text-slate-500">Acesso exclusivo para administrar produtos, estoque e pedidos.</p>
-          <div className="mt-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
-            <button type="button" onClick={() => setAuthMode("login")} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "login" ? "bg-white shadow-sm" : "text-slate-500"}`}>Entrar</button>
-            <button type="button" onClick={() => setAuthMode("signup")} className={`rounded-lg px-3 py-2.5 text-sm font-bold ${authMode === "signup" ? "bg-white shadow-sm" : "text-slate-500"}`}>Criar conta ADM</button>
-          </div>
           {authError && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{authError}</div>}
           <form onSubmit={submitAuth} className="mt-6 space-y-4">
-            {authMode === "signup" && <label className="grid gap-2 text-sm font-semibold">Nome<input required value={authName} onChange={(e) => setAuthName(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>}
             <label className="grid gap-2 text-sm font-semibold">E-mail<input required type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
             <label className="grid gap-2 text-sm font-semibold">Palavra-passe<input required minLength={6} type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>
-            {authMode === "signup" && <label className="grid gap-2 text-sm font-semibold">Confirmar palavra-passe<input required minLength={6} type="password" value={authConfirmation} onChange={(e) => setAuthConfirmation(e.target.value)} className="rounded-xl border border-slate-300 px-4 py-3 font-normal" /></label>}
-            <button disabled={authLoading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : authMode === "signup" ? "Criar conta ADM" : "Entrar no ADM"}</button>
+            <button disabled={authLoading} className="w-full rounded-xl bg-slate-950 px-5 py-3.5 font-bold text-white disabled:opacity-60">{authLoading ? "A processar..." : "Entrar no ADM"}</button>
           </form>
         </div>
       </main>
