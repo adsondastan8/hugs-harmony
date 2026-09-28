@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { listPublicProducts, type Product } from "../lib/supabase-data";
+import { createCheckoutOrder } from "../lib/supabase-orders";
 
 type CartItem = { productId: string; quantity: number };
 type DeliveryZone = "cidade" | "bairro";
@@ -58,7 +59,7 @@ function CheckoutPage() {
     writeCart(next);
   }
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     if (lines.length === 0) { setError("O seu pedido está vazio."); return; }
@@ -87,8 +88,25 @@ function CheckoutPage() {
       notes.trim() ? `Observação: ${notes.trim()}` : "",
     ].filter(Boolean).join("\n");
 
-    localStorage.removeItem(CART_KEY);
-    window.location.href = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    try {
+      const deliveryAddress = deliveryPlace === "bairro"
+        ? `Bairro: ${neighborhood.trim()} | ${address.trim()}`
+        : address.trim();
+      const orderId = await createCheckoutOrder({
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
+        deliveryAddress,
+        total,
+        notes: notes.trim(),
+        items: lines.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
+      });
+
+      localStorage.removeItem(CART_KEY);
+      const messageWithOrder = `${message}\n\nNúmero da encomenda: #${orderId.slice(0, 8).toUpperCase()}`;
+      window.location.href = `https://wa.me/${STORE_WHATSAPP_NUMBER}?text=${encodeURIComponent(messageWithOrder)}`;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível gravar a encomenda. Tente novamente.");
+    }
   }
 
   const fieldClass = "mt-2 w-full rounded-xl border border-[#e5dccd] bg-[#fffdf9] px-4 py-3.5 text-[15px] outline-none transition placeholder:text-[#9a8f80] focus:border-[#a88745] focus:ring-2 focus:ring-slate-900/10";
